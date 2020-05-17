@@ -1,18 +1,23 @@
 package de.sebli.jnr.listeners;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -34,36 +39,38 @@ public class WinListener implements Listener {
 		Player p = e.getPlayer();
 
 		if (StartListener.playing.containsKey(p.getName())) {
-			int id = p.getLocation().getBlock().getRelative(BlockFace.DOWN).getType().getId();
-			if (id == JNR.data.getInt("WinBlock")
-					|| p.getLocation().getBlock().getType().getId() == JNR.data.getInt("WinBlock")) {
+			if (p.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material
+					.getMaterial(JNR.data.getString("WinBlock"))
+					|| p.getLocation().getBlock().getType() == Material.getMaterial(JNR.data.getString("WinBlock"))) {
 				if (StartListener.checkpoint.get(p.getName()) > JNR.data
 						.getInt(StartListener.playing.get(p.getName()) + ".Checkpoints")
-						|| !JNR.data.getBoolean("NeedAllCheckpointsToWin")) {
-					int win = JNR.data.getInt(StartListener.playing.get(p.getName()) + ".Win");
-					int eWin = JNR.data.getInt("NewRecordWin");
+						|| !JNR.getInstance().getConfig().getBoolean("NeedAllCheckpointsToWin")) {
+//					int win = JNR.data.getInt(StartListener.playing.get(p.getName()) + ".Win");
+//					int eWin = JNR.data.getInt("NewRecordWin");
 
-					if (JNR.data.getBoolean("EnableVault")) {
-						String winTitle1 = JNR.messages.getString("Messages.Win.Title.Vault.1").replaceAll("&", "§")
-								.replaceAll("%map%", StartListener.playing.get(p.getName()))
-								.replaceAll("%win%", String.valueOf(win)).replaceAll("%moneyName%", JNR.getMoneyName());
+					WinListener.reset(p);
 
-						String winTitle2 = JNR.messages.getString("Messages.Win.Title.Vault.2").replaceAll("&", "§")
-								.replaceAll("%map%", StartListener.playing.get(p.getName()))
-								.replaceAll("%win%", String.valueOf(win)).replaceAll("%moneyName%", JNR.getMoneyName());
+//					if (JNR.data.getBoolean("EnableVault")) {
+//						String winTitle1 = JNR.messages.getString("Messages.Win.Title.Vault.1").replaceAll("&", "§")
+//								.replaceAll("%map%", StartListener.playing.get(p.getName()))
+//								.replaceAll("%win%", String.valueOf(win)).replaceAll("%moneyName%", JNR.getMoneyName());
+//
+//						String winTitle2 = JNR.messages.getString("Messages.Win.Title.Vault.2").replaceAll("&", "§")
+//								.replaceAll("%map%", StartListener.playing.get(p.getName()))
+//								.replaceAll("%win%", String.valueOf(win)).replaceAll("%moneyName%", JNR.getMoneyName());
+//
+//						p.sendTitle(winTitle1, winTitle2);
+//
+//						JNR.eco.bankDeposit(p.getName(), win);
+//					}
 
-						p.sendTitle(winTitle1, winTitle2);
+					String winTitle1 = JNR.messages.getString("Messages.Win.Title.1").replaceAll("&", "§")
+							.replaceAll("%map%", StartListener.playing.get(p.getName()));
 
-						JNR.eco.depositPlayer(p.getName(), win);
-					} else {
-						String winTitle1 = JNR.messages.getString("Messages.Win.Title.1").replaceAll("&", "§")
-								.replaceAll("%map%", StartListener.playing.get(p.getName()));
+					String winTitle2 = JNR.messages.getString("Messages.Win.Title.2").replaceAll("&", "§")
+							.replaceAll("%map%", StartListener.playing.get(p.getName()));
 
-						String winTitle2 = JNR.messages.getString("Messages.Win.Title.2").replaceAll("&", "§")
-								.replaceAll("%map%", StartListener.playing.get(p.getName()));
-
-						p.sendTitle(winTitle1, winTitle2);
-					}
+					p.sendTitle(winTitle1, winTitle2);
 
 					String jnr = StartListener.playing.get(p.getName());
 
@@ -83,21 +90,41 @@ public class WinListener implements Listener {
 						e2.printStackTrace();
 					}
 
-					World world = Bukkit.getWorld(JNR.data.getString(jnr + ".Leave.World"));
-					double x = JNR.data.getDouble(jnr + ".Leave.X");
-					double y = JNR.data.getDouble(jnr + ".Leave.Y");
-					double z = JNR.data.getDouble(jnr + ".Leave.Z");
-					float yaw = (float) JNR.data.getDouble(jnr + ".Leave.Yaw");
-					float pitch = (float) JNR.data.getDouble(jnr + ".Leave.Pitch");
+					if (!JNR.data.contains(jnr + ".Leave")) {
+						World world = Bukkit.getWorld(JNR.playerData.getString("Location." + p.getName() + ".World"));
+						double x = JNR.playerData.getDouble("Location." + p.getName() + ".X");
+						double y = JNR.playerData.getDouble("Location." + p.getName() + ".Y");
+						double z = JNR.playerData.getDouble("Location." + p.getName() + ".Z");
+						float yaw = (float) JNR.playerData.getDouble("Location." + p.getName() + ".Yaw");
+						float pitch = (float) JNR.playerData.getDouble("Location." + p.getName() + ".Pitch");
 
-					Location loc = new Location(world, x, y, z, yaw, pitch);
+						Location loc = new Location(world, x, y, z, yaw, pitch);
+
+						p.teleport(loc);
+
+						JNR.playerData.set("Location." + p.getName(), null);
+
+						try {
+							JNR.playerData.save(JNR.file2);
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+					} else {
+						World world = Bukkit.getWorld(JNR.data.getString(jnr + ".Leave.World"));
+						double x = JNR.data.getDouble(jnr + ".Leave.X");
+						double y = JNR.data.getDouble(jnr + ".Leave.Y");
+						double z = JNR.data.getDouble(jnr + ".Leave.Z");
+						float yaw = (float) JNR.data.getDouble(jnr + ".Leave.Yaw");
+						float pitch = (float) JNR.data.getDouble(jnr + ".Leave.Pitch");
+
+						Location loc = new Location(world, x, y, z, yaw, pitch);
+
+						p.teleport(loc);
+					}
 
 					for (Player all : Bukkit.getOnlinePlayers()) {
 						p.showPlayer(all);
 					}
-
-					p.teleport(loc);
-					WinListener.resetInventory(p);
 
 					long time = (System.nanoTime() - StartListener.time.get(p.getName())) / 1000000;
 
@@ -141,28 +168,30 @@ public class WinListener implements Listener {
 									e1.printStackTrace();
 								}
 
-								if (JNR.data.getBoolean("SendBroadcastAtNewRecord")) {
+								if (JNR.getInstance().getConfig().getBoolean("SendBroadcastAtNewRecord")) {
 									String broadcastMsg = JNR.messages.getString("Messages.NewGlobalRecord.Broadcast")
 											.replaceAll("&", "§").replaceAll("%map%", jnr)
 											.replaceAll("%player%", p.getDisplayName())
 											.replaceAll("%time%", JNRCommand.calculateTime(time).toString());
 
-									Bukkit.broadcastMessage(JNR.prefix + broadcastMsg);
+									if (!broadcastMsg.equalsIgnoreCase("x"))
+										Bukkit.broadcastMessage(JNR.prefix + broadcastMsg);
 								}
 
-								if (JNR.data.getBoolean("EnableVault")) {
-									JNR.eco.depositPlayer(p.getName(), eWin);
-
-									String bonusReceivedMsg = JNR.messages.getString("Messages.BonusForNewRecord.Vault")
-											.replaceAll("&", "§").replaceAll("%bonus%", String.valueOf(eWin))
-											.replaceAll("%moneyName%", JNR.getMoneyName());
-
-									p.sendMessage(JNR.prefix + bonusReceivedMsg);
-								}
+//								if (JNR.data.getBoolean("EnableVault")) {
+//									JNR.eco.bankDeposit(p.getName(), eWin);
+//
+//									String bonusReceivedMsg = JNR.messages.getString("Messages.BonusForNewRecord.Vault")
+//											.replaceAll("&", "§").replaceAll("%bonus%", String.valueOf(eWin))
+//											.replaceAll("%moneyName%", JNR.getMoneyName());
+//
+//									if (!bonusReceivedMsg.equalsIgnoreCase("x"))
+//										p.sendMessage(JNR.prefix + bonusReceivedMsg);
+//								}
 							}
 						}
 
-					}, 50L);
+					}, 60L);
 
 					int fails = StartListener.fails.get(p.getName());
 
@@ -191,7 +220,8 @@ public class WinListener implements Listener {
 					String errorMsg = JNR.messages.getString("Messages.NotAllCheckpoints").replaceAll("&", "§");
 
 					if (!wait.containsKey(p.getName())) {
-						p.sendMessage(JNR.prefix + errorMsg);
+						if (!errorMsg.equalsIgnoreCase("x"))
+							p.sendMessage(JNR.prefix + errorMsg);
 						wait.put(p.getName(), millis);
 					} else if (wait.containsKey(p.getName())) {
 
@@ -201,12 +231,14 @@ public class WinListener implements Listener {
 							return;
 						}
 						wait.put(p.getName(), millis);
-						p.sendMessage(JNR.prefix + errorMsg);
+						if (!errorMsg.equalsIgnoreCase("x"))
+							p.sendMessage(JNR.prefix + errorMsg);
 					}
 				}
-			} else if (p.getLocation().getBlock().getType().getId() == JNR.data.getInt("CheckpointBlock")
-					|| p.getLocation().getBlock().getRelative(BlockFace.DOWN).getType().getId() == JNR.data
-							.getInt("CheckpointBlock")) {
+			} else if (p.getLocation().getBlock().getType() == Material
+					.getMaterial(JNR.data.getString("CheckpointBlock"))
+					|| p.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material
+							.getMaterial(JNR.data.getString("CheckpointBlock"))) {
 
 				String jnr = StartListener.playing.get(p.getName());
 
@@ -271,23 +303,92 @@ public class WinListener implements Listener {
 
 		String cpTimeMsg = JNR.messages.getString("Messages.CheckpointReached.Time").replaceAll("&", "§")
 				.replaceAll("%time%", JNRCommand.calculateTime(time));
-		p.sendMessage(cpTimeMsg);
+		if (!cpTimeMsg.equalsIgnoreCase("x"))
+			p.sendMessage(cpTimeMsg);
 	}
 
-	public static void resetInventory(Player p) {
-		ItemStack[] content = StartListener.inventory.get(p.getName());
-		p.getInventory().setContents(content);
-		p.updateInventory();
-	}
+	public static void reset(Player p) {
+		StartListener.cooldown.add(p.getName());
 
-	@EventHandler
-	public void onFallDMG(EntityDamageEvent e) {
-		if (e.getEntity() instanceof Player) {
-			Player p = (Player) e.getEntity();
-			if (StartListener.playing.containsKey(p.getName())) {
-				e.setCancelled(true);
+		String jnr = (String) JNR.playerData.get(p.getName() + ".Map");
+
+		if (!JNR.data.contains(jnr + ".Leave")) {
+			World world = Bukkit.getWorld(JNR.playerData.getString(p.getName() + ".Location.World"));
+			double x = JNR.playerData.getDouble(p.getName() + ".Location.X");
+			double y = JNR.playerData.getDouble(p.getName() + ".Location.Y");
+			double z = JNR.playerData.getDouble(p.getName() + ".Location.Z");
+			float yaw = (float) JNR.playerData.getDouble(p.getName() + ".Location.Yaw");
+			float pitch = (float) JNR.playerData.getDouble(p.getName() + ".Location.Pitch");
+
+			Location loc = new Location(world, x, y, z, yaw, pitch);
+
+			p.teleport(loc);
+
+			JNR.playerData.set("Location." + p.getName(), null);
+
+			try {
+				JNR.playerData.save(JNR.file2);
+			} catch (IOException e1) {
+				e1.printStackTrace();
 			}
+		} else {
+			World world = Bukkit.getWorld(JNR.data.getString(jnr + ".Leave.World"));
+			double x = JNR.data.getDouble(jnr + ".Leave.X");
+			double y = JNR.data.getDouble(jnr + ".Leave.Y");
+			double z = JNR.data.getDouble(jnr + ".Leave.Z");
+			float yaw = (float) JNR.data.getDouble(jnr + ".Leave.Yaw");
+			float pitch = (float) JNR.data.getDouble(jnr + ".Leave.Pitch");
+
+			Location loc = new Location(world, x, y, z, yaw, pitch);
+
+			p.teleport(loc);
 		}
+
+		StartListener.playing.remove(p.getName());
+		StartListener.checkpoint.remove(p.getName());
+		StartListener.time.remove(p.getName());
+		StartListener.timer.remove(p.getName());
+
+		for (Player all : Bukkit.getOnlinePlayers()) {
+			p.showPlayer(all);
+		}
+
+		new org.bukkit.scheduler.BukkitRunnable() {
+			@SuppressWarnings({ "deprecation", "unchecked" })
+			public void run() {
+				p.setGameMode(GameMode.getByValue(JNR.playerData.getInt(p.getName() + ".Gamemode")));
+				p.setHealth(JNR.playerData.getDouble(p.getName() + ".Health"));
+				p.setFoodLevel(JNR.playerData.getInt(p.getName() + ".FoodLevel"));
+
+				try {
+					p.getInventory().setContents((ItemStack[]) JNR.playerData.get(p.getName() + ".Inv"));
+				} catch (Exception e) {
+					List<ItemStack> items = (List<ItemStack>) JNR.playerData.get(p.getName() + ".Inv");
+					ItemStack[] content = new ItemStack[items.size()];
+
+					int i = 0;
+					for (ItemStack item : items) {
+						content[i] = item;
+
+						i++;
+					}
+
+					p.getInventory().setContents(content);
+				}
+
+				p.updateInventory();
+
+				JNR.playerData.set(p.getName(), null);
+
+				StartListener.cooldown.remove(p.getName());
+
+				try {
+					JNR.playerData.save(JNR.file2);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}.runTaskLater(JNR.getInstance(), 10L);
 	}
 
 	@EventHandler
@@ -312,12 +413,11 @@ public class WinListener implements Listener {
 		if (StartListener.playing.containsKey(p.getName())) {
 			String jnr = StartListener.playing.get(p.getName());
 
-			JNR.invs.set(p.getName() + ".Map", jnr);
-			JNR.invs.set(p.getName() + ".isPlaying", true);
-			JNR.invs.set(p.getName() + ".Inv", StartListener.inventory.get(p.getName()));
+			JNR.playerData.set(p.getName() + ".Map", jnr);
+			JNR.playerData.set(p.getName() + ".isPlaying", true);
 
 			try {
-				JNR.invs.save(JNR.file2);
+				JNR.playerData.save(JNR.file2);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
@@ -334,6 +434,41 @@ public class WinListener implements Listener {
 	public void onBuild(BlockPlaceEvent e) {
 		if (StartListener.playing.containsKey(e.getPlayer().getName())) {
 			e.setCancelled(true);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@EventHandler
+	public void onBreak(BlockBreakEvent e) {
+		if (StartListener.playing.containsKey(e.getPlayer().getName())) {
+			e.setCancelled(true);
+		}
+
+		if (e.getBlock().getState() instanceof Sign) {
+			Sign sign = (Sign) e.getBlock().getState();
+
+			if (sign.getLine(0).isEmpty())
+				return;
+
+			List<Location> signLocs = new ArrayList<>();
+
+			if (JNR.data.contains(sign.getLine(1) + ".JoinSign")) {
+				signLocs = (List<Location>) JNR.data.getList(sign.getLine(1) + ".JoinSign");
+			}
+
+			if (signLocs.contains(sign.getLocation())) {
+				signLocs.remove(sign.getLocation());
+
+				JNR.data.set(sign.getLine(1) + ".JoinSign", signLocs);
+
+				try {
+					JNR.data.save(JNR.file);
+
+					e.getPlayer().sendMessage(JNR.prefix + "§cJoin-Schild wurde entfernt.");
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
 		}
 	}
 

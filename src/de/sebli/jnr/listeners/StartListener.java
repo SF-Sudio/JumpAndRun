@@ -3,12 +3,11 @@ package de.sebli.jnr.listeners;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.World;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,7 +20,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import de.sebli.jnr.ActionBar;
 import de.sebli.jnr.JNR;
+import de.sebli.jnr.commands.JNRCommand;
 
 public class StartListener implements Listener {
 
@@ -32,17 +33,38 @@ public class StartListener implements Listener {
 	public static HashMap<String, Long> time = new HashMap<>();
 	public static HashMap<String, Integer> fails = new HashMap<>();
 
+	public static List<String> cooldown = new ArrayList<String>();
+
+	@SuppressWarnings("unchecked")
 	@EventHandler
 	public void onSignChange(SignChangeEvent e) {
 		if (e.getPlayer().hasPermission("jnr.admin")) {
-			if (e.getLine(0).equalsIgnoreCase("[jnr]")) {
+			if (e.getLine(0).equalsIgnoreCase("[jnr]") && !e.getLine(1).isEmpty()) {
 				String line1 = JNR.messages.getString("Messages.JoinSign.1").replaceAll("&", "§");
 				e.setLine(0, line1);
+
+				List<Location> signLocs = new ArrayList<>();
+
+				if (JNR.data.contains(e.getLine(1) + ".JoinSign")) {
+					signLocs = (List<Location>) JNR.data.getList(e.getLine(1) + ".JoinSign");
+				}
+
+				signLocs.add(e.getBlock().getLocation());
+
+				JNR.data.set(e.getLine(1) + ".JoinSign", signLocs);
+
+				try {
+					JNR.data.save(JNR.file);
+
+					e.getPlayer().sendMessage(JNR.prefix + "§aJoin-Schild wurde erstellt.");
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("unchecked")
 	@EventHandler
 	public void onStart(PlayerInteractEvent e) {
 		Player p = e.getPlayer();
@@ -50,73 +72,69 @@ public class StartListener implements Listener {
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			if (e.getClickedBlock().getState() instanceof Sign) {
 				Sign sign = (Sign) e.getClickedBlock().getState();
-				String line1 = JNR.messages.getString("Messages.JoinSign.1").replaceAll("&", "§");
-				if (line1.contains(sign.getLine(0))) {
-					if (!playing.containsKey(p.getName())) {
-						if (JNR.data.contains(sign.getLine(1))) {
-							String jnr = sign.getLine(1);
-							World world = Bukkit.getWorld(JNR.data.getString(jnr + ".World"));
-							double x = JNR.data.getDouble(jnr + ".X");
-							double y = JNR.data.getDouble(jnr + ".Y");
-							double z = JNR.data.getDouble(jnr + ".Z");
-							float yaw = (float) JNR.data.getDouble(jnr + ".Yaw");
-							float pitch = (float) JNR.data.getDouble(jnr + ".Pitch");
 
-							Location loc = new Location(world, x, y, z, yaw, pitch);
+				if (sign.getLine(0).isEmpty())
+					return;
 
-							if (playing.containsKey(p.getName())) {
-								playing.remove(p.getName());
-							}
-							if (checkpoint.containsKey(p.getName())) {
-								checkpoint.remove(p.getName());
-							}
-							playing.put(p.getName(), jnr);
-							checkpoint.put(p.getName(), 1);
+				List<Location> signLocs = new ArrayList<>();
 
-							saveInventory(p);
+				if (JNR.data.contains(sign.getLine(1) + ".JoinSign")) {
+					signLocs = (List<Location>) JNR.data.getList(sign.getLine(1) + ".JoinSign");
+				}
 
-							p.getInventory().clear();
-							setInventory(p);
+				if (signLocs.contains(sign.getLocation())) {
+					String jnr = sign.getLine(1);
 
-							p.teleport(loc);
-							p.sendTitle(jnr, "");
-
-							time.put(p.getName(), System.nanoTime());
-							fails.put(p.getName(), 0);
-
-							if (!JNR.stats.contains(jnr + ".globalBestTime")) {
-								JNR.stats.set(jnr + ".globalBestTime", 0.0);
-							}
-
-							if (JNR.stats.contains(p.getName() + "." + jnr + ".playedTimes")) {
-								int pt = JNR.stats.getInt(p.getName() + "." + jnr + ".playedTimes") + 1;
-								JNR.stats.set(p.getName() + "." + jnr + ".playedTimes", pt);
-							} else {
-								JNR.stats.set(p.getName() + "." + jnr + ".playedTimes", 1);
-							}
-
-							try {
-								JNR.stats.save(JNR.file3);
-							} catch (IOException e1) {
-								e1.printStackTrace();
-							}
-						}
-					} else {
-						String errorMsg = JNR.messages.getString("Messages.AlreadyInAJumpAndRun").replaceAll("&", "§")
-								.replaceAll("%map%", StartListener.playing.get(p.getName()));
-						p.sendMessage(JNR.prefix + errorMsg);
+					p.performCommand("jnr join " + jnr);
+				} else {
+					if (p.hasPermission("jnr.admin")) {
+						p.sendMessage(JNR.prefix
+								+ "§cDurch das neuste Plugin-Update musst du alle Join-Schilder neu setzen, damit sie wieder funktionieren."
+								+ "\n§cHier erfährst du die Gründe dafür: §e§lhttps://www.spigotmc.org/resources/jumpandrun-1-8-1-12-x.78123/updates");
 					}
 				}
+
+//				String line1 = JNR.messages.getString("Messages.JoinSign.1");
+//				String sLine1 = sign.getLine(0);
+//
+//				char[] c = { 'a', 'b', 'c', 'd', 'e', 'f', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'k', 'l',
+//						'm', 'n', 'o', 'r' };
+//
+//				for (char ch : c) {
+//					line1 = line1.replaceAll("&" + ch, "");
+//					sLine1 = sLine1.replaceAll("§" + ch, "");
+//				}
+//
+//				if (sLine1.equalsIgnoreCase(line1)) {
+//					String jnr = sign.getLine(1);
+//
+//					p.performCommand("jnr join " + jnr);
+//				}
 			}
 		} else if (e.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
 			if (e.getClickedBlock().getState() instanceof Sign) {
 				Sign sign = (Sign) e.getClickedBlock().getState();
-				String map = sign.getLine(1);
 
-				String line1 = JNR.messages.getString("Messages.JoinSign.1").replaceAll("&", "§");
-				if (line1.contains(sign.getLine(0))) {
-					if (JNR.stats.contains(sign.getLine(1))) {
+				if (sign.getLine(0).isEmpty())
+					return;
+
+				if (JNR.stats.contains(sign.getLine(1))) {
+					List<Location> signLocs = new ArrayList<>();
+
+					if (JNR.data.contains(sign.getLine(1) + ".JoinSign")) {
+						signLocs = (List<Location>) JNR.data.getList(sign.getLine(1) + ".JoinSign");
+					}
+
+					if (signLocs.contains(sign.getLocation())) {
+						String map = sign.getLine(1);
+
 						p.performCommand("jnr stats " + map);
+					} else {
+						if (p.hasPermission("jnr.admin")) {
+							p.sendMessage(JNR.prefix
+									+ "§cDurch das neuste Plugin-Update musst du alle Join-Schilder neu setzen, damit sie wieder funktionieren."
+									+ "\n§cHier erfährst du die Gründe dafür: §e§lhttps://www.spigotmc.org/resources/jumpandrun-1-8-1-12-x.78123/updates");
+						}
 					}
 				}
 			}
@@ -135,7 +153,8 @@ public class StartListener implements Listener {
 						e.setCancelled(true);
 
 						String errorMsg = JNR.messages.getString("Messages.NoCommandsWhileInGame").replaceAll("&", "§");
-						p.sendMessage(JNR.prefix + errorMsg);
+						if (!errorMsg.equalsIgnoreCase("x"))
+							p.sendMessage(JNR.prefix + errorMsg);
 					}
 				} else {
 					e.setCancelled(false);
@@ -157,7 +176,8 @@ public class StartListener implements Listener {
 					if (p.hasPermission("jnr.admin")) {
 						String errorMsg = JNR.messages.getString("Messages.NoRealoadsWhileGameRunning").replaceAll("&",
 								"§");
-						p.sendMessage(JNR.prefix + errorMsg);
+						if (!errorMsg.equalsIgnoreCase("x"))
+							p.sendMessage(JNR.prefix + errorMsg);
 					}
 				}
 			}
@@ -168,85 +188,64 @@ public class StartListener implements Listener {
 	public void onJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
 
-		if (JNR.invs.getBoolean(p.getName() + ".isPlaying")) {
-			String jnr = (String) JNR.invs.get(p.getName() + ".Map");
-
-			World world = Bukkit.getWorld(JNR.data.getString(jnr + ".Leave.World"));
-			double x = JNR.data.getDouble(jnr + ".Leave.X");
-			double y = JNR.data.getDouble(jnr + ".Leave.Y");
-			double z = JNR.data.getDouble(jnr + ".Leave.Z");
-			float yaw = (float) JNR.data.getDouble(jnr + ".Leave.Yaw");
-			float pitch = (float) JNR.data.getDouble(jnr + ".Leave.Pitch");
-
-			Location loc = new Location(world, x, y, z, yaw, pitch);
-
-			p.teleport(loc);
-
-			new org.bukkit.scheduler.BukkitRunnable() {
-				public void run() {
-					String leftServerMsg = JNR.messages.getString("Messages.LeftServerWhileInGame").replaceAll("&",
-							"§");
-
-					p.sendMessage(JNR.prefix + leftServerMsg);
-				}
-			}.runTaskLater(JNR.getInstance(), 10L);
-
-			new org.bukkit.scheduler.BukkitRunnable() {
-				@SuppressWarnings({ "rawtypes", "unchecked" })
-				public void run() {
-
-					ItemStack[] content;
-
-					try {
-						ArrayList list = (ArrayList) JNR.invs.get(p.getName() + ".Inv");
-
-						content = (ItemStack[]) list.toArray(new ItemStack[list.size()]);
-					} catch (Exception ex) {
-						content = (ItemStack[]) JNR.invs.get(p.getName() + ".Inv");
-					}
-
-					p.getInventory().setContents(content);
-
-					String invRestoredMsg = JNR.messages.getString("Messages.InventoryRestored").replaceAll("&", "§");
-					p.sendMessage(JNR.prefix + invRestoredMsg);
-
-					JNR.invs.set(p.getName(), null);
-
-					try {
-						JNR.invs.save(JNR.file2);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-				}
-			}.runTaskLater(JNR.getInstance(), 40L);
-
-			playing.remove(p.getName());
-
-			JNR.invs.set(p.getName() + ".isPlaying", false);
-
-			try {
-				JNR.invs.save(JNR.file2);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+		if (JNR.playerData.getBoolean(p.getName() + ".isPlaying")) {
+			WinListener.reset(p);
 		}
 	}
 
-	private void setInventory(Player p) {
-		ItemStack show = new ItemStack(Material.GLOWSTONE_DUST);
+	@SuppressWarnings("deprecation")
+	public static void setInventory(Player p) {
+		int id = 0;
+		int subID = 0;
+
+		int id2 = 0;
+		int subID2 = 0;
+
+		int id3 = 0;
+		int subID3 = 0;
+
+		if (JNR.data.getString("Item.BackToLastCheckpoint").contains(":")) {
+			String[] array = JNR.data.getString("Item.BackToLastCheckpoint").split(":");
+			id = Integer.valueOf(array[0]);
+			subID = Integer.valueOf(array[1]);
+		} else {
+			id = Integer.valueOf(JNR.data.getString("Item.BackToLastCheckpoint"));
+		}
+
+		if (JNR.data.getString("Item.HidePlayers").contains(":")) {
+			String[] array = JNR.data.getString("Item.HidePlayers").split(":");
+			id2 = Integer.valueOf(array[0]);
+			subID2 = Integer.valueOf(array[1]);
+		} else {
+			id2 = Integer.valueOf(JNR.data.getString("Item.HidePlayers"));
+		}
+
+		if (JNR.data.getString("Item.Quit").contains(":")) {
+			String[] array = JNR.data.getString("Item.Quit").split(":");
+			id3 = Integer.valueOf(array[0]);
+			subID3 = Integer.valueOf(array[1]);
+		} else {
+			id3 = Integer.valueOf(JNR.data.getString("Item.Quit"));
+		}
+
+		String checkName = JNR.messages.getString("Item.BackToLastCheckpoint.Name").replaceAll("&", "§");
+		String showName = JNR.messages.getString("Item.HidePlayers.Name").replaceAll("&", "§");
+		String quitName = JNR.messages.getString("Item.Quit.Name").replaceAll("&", "§");
+
+		ItemStack check = new ItemStack(id, 1, (byte) subID);
+		ItemMeta check1 = check.getItemMeta();
+		check1.setDisplayName(checkName);
+		check.setItemMeta(check1);
+
+		ItemStack show = new ItemStack(id2, 1, (byte) subID2);
 		ItemMeta show1 = show.getItemMeta();
-		show1.setDisplayName("§cSpieler verstecken");
+		show1.setDisplayName(showName);
 		show.setItemMeta(show1);
 
-		ItemStack leave = new ItemStack(Material.SLIME_BALL);
+		ItemStack leave = new ItemStack(id3, 1, (byte) subID3);
 		ItemMeta leave1 = leave.getItemMeta();
-		leave1.setDisplayName("§cVerlassen");
+		leave1.setDisplayName(quitName);
 		leave.setItemMeta(leave1);
-
-		ItemStack check = new ItemStack(Material.REDSTONE);
-		ItemMeta check1 = check.getItemMeta();
-		check1.setDisplayName("§cZum letzten Checkpoint");
-		check.setItemMeta(check1);
 
 		new org.bukkit.scheduler.BukkitRunnable() {
 			public void run() {
@@ -270,8 +269,58 @@ public class StartListener implements Listener {
 		}.runTaskLater(JNR.getInstance(), 15L);
 	}
 
-	private void saveInventory(Player p) {
-		inventory.put(p.getName(), p.getInventory().getContents());
+	@SuppressWarnings("deprecation")
+	public static void savePlayerData(Player p) {
+		String jnr = StartListener.playing.get(p.getName());
+
+		JNR.playerData.set(p.getName() + ".Gamemode", p.getGameMode().getValue());
+		JNR.playerData.set(p.getName() + ".Health", p.getHealth());
+		JNR.playerData.set(p.getName() + ".FoodLevel", p.getFoodLevel());
+		JNR.playerData.set(p.getName() + ".Map", jnr);
+		JNR.playerData.set(p.getName() + ".isPlaying", true);
+		JNR.playerData.set(p.getName() + ".Inv", p.getInventory().getContents());
+		
+		if (!JNR.data.contains(jnr + ".Leave")) {
+			JNR.playerData.set(p.getName() + ".Location.World", p.getLocation().getWorld().getName());
+			JNR.playerData.set(p.getName() + ".Location.X", p.getLocation().getX());
+			JNR.playerData.set(p.getName() + ".Location.Y", p.getLocation().getY());
+			JNR.playerData.set(p.getName() + ".Location.Z", p.getLocation().getZ());
+			JNR.playerData.set(p.getName() + ".Location.Yaw", p.getLocation().getYaw());
+			JNR.playerData.set(p.getName() + ".Location.Pitch", p.getLocation().getPitch());
+		}
+
+		try {
+			JNR.playerData.save(JNR.file2);
+		} catch (Exception e1) {
+			p.sendMessage(JNR.prefix + "§cDein Inventar kann nicht gespeichert werden."
+					+ "\n§cBitte entferne unzulässige Items aus deinem Inventar (z.B. Custom Player Heads), um diesen Bug zu vermeiden und einem JumpAndRun beitreten zu können.");
+			ItemListener.quit(p);
+			e1.printStackTrace();
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	public static void displayTimer(Player p) {
+		Bukkit.getScheduler().scheduleAsyncRepeatingTask(JNR.getInstance(), new Runnable() {
+
+			@Override
+			public void run() {
+				if (playing.containsKey(p.getName())) {
+					long time = (System.nanoTime() - StartListener.time.get(p.getName())) / 1000000;
+
+					String abText = JNR.messages.getString("Messages.ActionBar").replaceAll("&", "§")
+							.replaceAll("%map%", StartListener.playing.get(p.getName()))
+							.replaceAll("%time%", JNRCommand.calculateTimeInSeconds(time))
+							.replaceAll("%fails%", StartListener.fails.get(p.getName()).toString());
+
+					ActionBar actionBar = new ActionBar(abText);
+					actionBar.sendToPlayer(p);
+				} else {
+					return;
+				}
+			}
+
+		}, 0, 20);
 	}
 
 }
