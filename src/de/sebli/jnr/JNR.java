@@ -122,7 +122,7 @@ public class JNR extends JavaPlugin {
 
 		getConfig().options().header(
 				"Achtung! Wenn du 'EnableReloadWhilePlayerInGame' auf 'true' setzt (NICHT empfohlen!) und den Reload-Befehl nutzt während Spieler in einem JumpAndRun sind,"
-						+ "\nkönnen diese die JumpAndRun Items nicht mehr benutzen und das Inventar des Spielers kann nicht mehr wiederhergestellt werden."
+						+ "\nkönnen diese die JumpAndRun Items nicht mehr benutzen und müssen neujoinen, um ihr altes Inventar wieder zu bekommen."
 						+ "\n" + "\nBeachte, dass wenn du 'EnableCommandsWhileInGame' auf 'true' setzt,"
 						+ "\ndie Spieler sich mit z.B. einem (wenn vorhanden) Warp- oder Spawn-Befehl aus dem JumpAndRun teleportieren können und die JumpAndRun Items somit behalten können.");
 
@@ -330,12 +330,12 @@ public class JNR extends JavaPlugin {
 //		return (eco != null);
 //	}
 
-	public static String getMoneyName() {
-		String mn = "$";
-		if (data.contains("MoneyName")) {
-			mn = data.getString("MoneyName");
-		}
-		return mn;
-	}
+//	public static String getMoneyName() {
+//		String mn = "$";
+//		if (data.contains("MoneyName")) {
+//			mn = data.getString("MoneyName");
+//		}
+//		return mn;
+//	}
 
 }

@@ -15,11 +15,10 @@ import org.bukkit.entity.Player;
 
 import de.sebli.jnr.JNR;
 import de.sebli.jnr.listeners.StartListener;
-import net.minecraft.server.v1_8_R3.Material;
 
 public class JNRCommand implements CommandExecutor {
 
-	@SuppressWarnings({ "unlikely-arg-type", "deprecation" })
+	@SuppressWarnings({ "deprecation" })
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (!(sender instanceof Player)) {
@@ -171,7 +170,7 @@ public class JNRCommand implements CommandExecutor {
 								sendHelp(p, args[0]);
 							}
 						} else if (args[0].equalsIgnoreCase("item")) {
-							if (p.getItemInHand() != null || p.getItemInHand().getType().equals(Material.AIR)) {
+							if (p.getItemInHand() != null && p.getItemInHand().getType().getId() != 0) {
 								if (args[1].equalsIgnoreCase("checkpoint")) {
 									JNR.data.set("Item.BackToLastCheckpoint", p.getItemInHand().getType().getId() + ":"
 											+ p.getItemInHand().getData().getData());
@@ -324,7 +323,7 @@ public class JNRCommand implements CommandExecutor {
 				p.setFoodLevel(20);
 
 				StartListener.displayTimer(p);
-				
+
 				if (StartListener.playing.containsKey(p.getName())) {
 					StartListener.playing.remove(p.getName());
 				}
@@ -342,7 +341,7 @@ public class JNRCommand implements CommandExecutor {
 				float pitch = (float) JNR.data.getDouble(jnr + ".Pitch");
 
 				Location loc = new Location(world, x, y, z, yaw, pitch);
-				
+
 				p.teleport(loc);
 
 				String joinTitle1 = JNR.messages.getString("Messages.JoinTitle.1").replaceAll("&", "§")
@@ -532,7 +531,7 @@ public class JNRCommand implements CommandExecutor {
 		}
 	}
 
-	private static boolean containsMap(String map) {
+	public static boolean containsMap(String map) {
 		boolean cont = false;
 
 		ArrayList<String> keys = new ArrayList<String>();

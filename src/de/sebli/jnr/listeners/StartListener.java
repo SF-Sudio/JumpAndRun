@@ -45,13 +45,13 @@ public class StartListener implements Listener {
 
 				List<Location> signLocs = new ArrayList<>();
 
-				if (JNR.data.contains(e.getLine(1) + ".JoinSign")) {
-					signLocs = (List<Location>) JNR.data.getList(e.getLine(1) + ".JoinSign");
+				if (JNR.data.contains("JoinSign." + e.getLine(1))) {
+					signLocs = (List<Location>) JNR.data.getList("JoinSign." + e.getLine(1));
 				}
 
 				signLocs.add(e.getBlock().getLocation());
 
-				JNR.data.set(e.getLine(1) + ".JoinSign", signLocs);
+				JNR.data.set("JoinSign." + e.getLine(1), signLocs);
 
 				try {
 					JNR.data.save(JNR.file);
@@ -73,13 +73,16 @@ public class StartListener implements Listener {
 			if (e.getClickedBlock().getState() instanceof Sign) {
 				Sign sign = (Sign) e.getClickedBlock().getState();
 
-				if (sign.getLine(0).isEmpty())
+				if (sign.getLine(1).isEmpty())
+					return;
+
+				if (!JNRCommand.containsMap(sign.getLine(1)))
 					return;
 
 				List<Location> signLocs = new ArrayList<>();
 
-				if (JNR.data.contains(sign.getLine(1) + ".JoinSign")) {
-					signLocs = (List<Location>) JNR.data.getList(sign.getLine(1) + ".JoinSign");
+				if (JNR.data.contains("JoinSign." + sign.getLine(1))) {
+					signLocs = (List<Location>) JNR.data.getList("JoinSign." + sign.getLine(1));
 				}
 
 				if (signLocs.contains(sign.getLocation())) {
@@ -118,11 +121,11 @@ public class StartListener implements Listener {
 				if (sign.getLine(0).isEmpty())
 					return;
 
-				if (JNR.stats.contains(sign.getLine(1))) {
+				if (JNR.data.contains(sign.getLine(1))) {
 					List<Location> signLocs = new ArrayList<>();
 
-					if (JNR.data.contains(sign.getLine(1) + ".JoinSign")) {
-						signLocs = (List<Location>) JNR.data.getList(sign.getLine(1) + ".JoinSign");
+					if (JNR.data.contains("JoinSign." + sign.getLine(1))) {
+						signLocs = (List<Location>) JNR.data.getList("JoinSign." + sign.getLine(1));
 					}
 
 					if (signLocs.contains(sign.getLocation())) {
@@ -279,7 +282,7 @@ public class StartListener implements Listener {
 		JNR.playerData.set(p.getName() + ".Map", jnr);
 		JNR.playerData.set(p.getName() + ".isPlaying", true);
 		JNR.playerData.set(p.getName() + ".Inv", p.getInventory().getContents());
-		
+
 		if (!JNR.data.contains(jnr + ".Leave")) {
 			JNR.playerData.set(p.getName() + ".Location.World", p.getLocation().getWorld().getName());
 			JNR.playerData.set(p.getName() + ".Location.X", p.getLocation().getX());
