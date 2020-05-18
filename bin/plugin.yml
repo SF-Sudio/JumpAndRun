@@ -1,9 +1,0 @@
-name: JumpAndRun
-author: Seblii
-version: 2.0
-
-main: de.sebli.jnr.JNR
-
-commands:
-  jnr:
-    aliases: [jumpandrun]
