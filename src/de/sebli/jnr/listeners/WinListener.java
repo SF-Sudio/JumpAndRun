@@ -48,8 +48,6 @@ public class WinListener implements Listener {
 //					int win = JNR.data.getInt(StartListener.playing.get(p.getName()) + ".Win");
 //					int eWin = JNR.data.getInt("NewRecordWin");
 
-					WinListener.reset(p);
-
 //					if (JNR.data.getBoolean("EnableVault")) {
 //						String winTitle1 = JNR.messages.getString("Messages.Win.Title.Vault.1").replaceAll("&", "§")
 //								.replaceAll("%map%", StartListener.playing.get(p.getName()))
@@ -84,49 +82,24 @@ public class WinListener implements Listener {
 						JNR.stats.set(p.getName() + "." + jnr + ".finishedTimes", 1);
 					}
 
+					int fails = StartListener.fails.get(p.getName());
+					long time = (System.nanoTime() - StartListener.time.get(p.getName())) / 1000000;
+
+					p.sendMessage("§8===============");
+					p.sendMessage("");
+					p.sendMessage("§aMap§7: §6" + jnr);
+					p.sendMessage("§aZeit§7: " + JNRCommand.calculateTime(time));
+					p.sendMessage("§aFails§7: §6" + fails);
+					p.sendMessage("");
+					p.sendMessage("§8===============");
+
+					JNR.stats.set(p.getName() + "." + jnr + ".fails", fails);
+
 					try {
 						JNR.stats.save(JNR.file3);
-					} catch (IOException e2) {
-						e2.printStackTrace();
+					} catch (IOException e1) {
+						e1.printStackTrace();
 					}
-
-					if (!JNR.data.contains(jnr + ".Leave")) {
-						World world = Bukkit.getWorld(JNR.playerData.getString("Location." + p.getName() + ".World"));
-						double x = JNR.playerData.getDouble("Location." + p.getName() + ".X");
-						double y = JNR.playerData.getDouble("Location." + p.getName() + ".Y");
-						double z = JNR.playerData.getDouble("Location." + p.getName() + ".Z");
-						float yaw = (float) JNR.playerData.getDouble("Location." + p.getName() + ".Yaw");
-						float pitch = (float) JNR.playerData.getDouble("Location." + p.getName() + ".Pitch");
-
-						Location loc = new Location(world, x, y, z, yaw, pitch);
-
-						p.teleport(loc);
-
-						JNR.playerData.set("Location." + p.getName(), null);
-
-						try {
-							JNR.playerData.save(JNR.file2);
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						}
-					} else {
-						World world = Bukkit.getWorld(JNR.data.getString(jnr + ".Leave.World"));
-						double x = JNR.data.getDouble(jnr + ".Leave.X");
-						double y = JNR.data.getDouble(jnr + ".Leave.Y");
-						double z = JNR.data.getDouble(jnr + ".Leave.Z");
-						float yaw = (float) JNR.data.getDouble(jnr + ".Leave.Yaw");
-						float pitch = (float) JNR.data.getDouble(jnr + ".Leave.Pitch");
-
-						Location loc = new Location(world, x, y, z, yaw, pitch);
-
-						p.teleport(loc);
-					}
-
-					for (Player all : Bukkit.getOnlinePlayers()) {
-						p.showPlayer(all);
-					}
-
-					long time = (System.nanoTime() - StartListener.time.get(p.getName())) / 1000000;
 
 					Bukkit.getScheduler().scheduleSyncDelayedTask(JNR.getInstance(), new Runnable() {
 
@@ -193,27 +166,7 @@ public class WinListener implements Listener {
 
 					}, 60L);
 
-					int fails = StartListener.fails.get(p.getName());
-
-					p.sendMessage("§8===============");
-					p.sendMessage("");
-					p.sendMessage("§aMap§7: §6" + jnr);
-					p.sendMessage("§aZeit§7: " + JNRCommand.calculateTime(time));
-					p.sendMessage("§aFails§7: §6" + fails);
-					p.sendMessage("");
-					p.sendMessage("§8===============");
-
-					JNR.stats.set(p.getName() + "." + jnr + ".fails", fails);
-
-					try {
-						JNR.stats.save(JNR.file3);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-
-					StartListener.fails.remove(p.getName());
-					StartListener.timer.remove(p.getName());
-					StartListener.time.remove(p.getName());
+					WinListener.reset(p);
 				} else {
 					Long millis = System.currentTimeMillis();
 
