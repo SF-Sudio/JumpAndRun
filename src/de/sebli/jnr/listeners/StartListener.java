@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -35,7 +35,6 @@ public class StartListener implements Listener {
 
 	public static List<String> cooldown = new ArrayList<String>();
 
-	@SuppressWarnings("unchecked")
 	@EventHandler
 	public void onSignChange(SignChangeEvent e) {
 		if (e.getPlayer().hasPermission("jnr.admin")) {
@@ -43,13 +42,14 @@ public class StartListener implements Listener {
 				String line1 = JNR.messages.getString("Messages.JoinSign.1").replaceAll("&", "§");
 				e.setLine(0, line1);
 
-				List<Location> signLocs = new ArrayList<>();
+				List<String> signLocs = new ArrayList<>();
 
 				if (JNR.data.contains("JoinSign." + e.getLine(1))) {
-					signLocs = (List<Location>) JNR.data.getList("JoinSign." + e.getLine(1));
+					signLocs = JNR.data.getStringList("JoinSign." + e.getLine(1));
 				}
 
-				signLocs.add(e.getBlock().getLocation());
+				signLocs.add(e.getBlock().getWorld().getName() + " : " + e.getBlock().getLocation().getX() + ", "
+						+ e.getBlock().getLocation().getY() + ", " + e.getBlock().getLocation().getZ());
 
 				JNR.data.set("JoinSign." + e.getLine(1), signLocs);
 
@@ -64,7 +64,6 @@ public class StartListener implements Listener {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@EventHandler
 	public void onStart(PlayerInteractEvent e) {
 		Player p = e.getPlayer();
@@ -79,13 +78,16 @@ public class StartListener implements Listener {
 				if (!JNRCommand.containsMap(sign.getLine(1)))
 					return;
 
-				List<Location> signLocs = new ArrayList<>();
+				List<String> signLocs = new ArrayList<>();
 
 				if (JNR.data.contains("JoinSign." + sign.getLine(1))) {
-					signLocs = (List<Location>) JNR.data.getList("JoinSign." + sign.getLine(1));
+					signLocs = JNR.data.getStringList("JoinSign." + sign.getLine(1));
 				}
 
-				if (signLocs.contains(sign.getLocation())) {
+				String signLocStr = sign.getLocation().getWorld().getName() + " : " + sign.getLocation().getX() + ", "
+						+ sign.getLocation().getY() + ", " + sign.getLocation().getZ();
+
+				if (signLocs.contains(signLocStr)) {
 					String jnr = sign.getLine(1);
 
 					p.performCommand("jnr join " + jnr);
@@ -121,23 +123,27 @@ public class StartListener implements Listener {
 				if (sign.getLine(0).isEmpty())
 					return;
 
-				if (JNR.data.contains(sign.getLine(1))) {
-					List<Location> signLocs = new ArrayList<>();
+				if (!JNRCommand.containsMap(sign.getLine(1)))
+					return;
 
-					if (JNR.data.contains("JoinSign." + sign.getLine(1))) {
-						signLocs = (List<Location>) JNR.data.getList("JoinSign." + sign.getLine(1));
-					}
+				List<String> signLocs = new ArrayList<>();
 
-					if (signLocs.contains(sign.getLocation())) {
-						String map = sign.getLine(1);
+				if (JNR.data.contains("JoinSign." + sign.getLine(1))) {
+					signLocs = JNR.data.getStringList("JoinSign." + sign.getLine(1));
+				}
 
-						p.performCommand("jnr stats " + map);
-					} else {
-						if (p.hasPermission("jnr.admin")) {
-							p.sendMessage(JNR.prefix
-									+ "§cDurch das neuste Plugin-Update musst du alle Join-Schilder neu setzen, damit sie wieder funktionieren."
-									+ "\n§cHier erfährst du die Gründe dafür: §e§lhttps://www.spigotmc.org/resources/jumpandrun-1-8-1-12-x.78123/updates");
-						}
+				String signLocStr = sign.getLocation().getWorld().getName() + " : " + sign.getLocation().getX() + ", "
+						+ sign.getLocation().getY() + ", " + sign.getLocation().getZ();
+
+				if (signLocs.contains(signLocStr)) {
+					String map = sign.getLine(1);
+
+					p.performCommand("jnr stats " + map);
+				} else {
+					if (p.hasPermission("jnr.admin")) {
+						p.sendMessage(JNR.prefix
+								+ "§cDurch das neuste Plugin-Update musst du alle Join-Schilder neu setzen, damit sie wieder funktionieren."
+								+ "\n§cHier erfährst du die Gründe dafür: §e§lhttps://www.spigotmc.org/resources/jumpandrun-1-8-1-12-x.78123/updates");
 					}
 				}
 			}
@@ -196,80 +202,103 @@ public class StartListener implements Listener {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void setInventory(Player p) {
-		int id = 0;
-		int subID = 0;
+		try {
+			String id = "AIR";
+			int subID = 0;
 
-		int id2 = 0;
-		int subID2 = 0;
+			String id2 = "AIR";
+			int subID2 = 0;
 
-		int id3 = 0;
-		int subID3 = 0;
+			String id3 = "AIR";
+			int subID3 = 0;
 
-		if (JNR.data.getString("Item.BackToLastCheckpoint").contains(":")) {
-			String[] array = JNR.data.getString("Item.BackToLastCheckpoint").split(":");
-			id = Integer.valueOf(array[0]);
-			subID = Integer.valueOf(array[1]);
-		} else {
-			id = Integer.valueOf(JNR.data.getString("Item.BackToLastCheckpoint"));
-		}
-
-		if (JNR.data.getString("Item.HidePlayers").contains(":")) {
-			String[] array = JNR.data.getString("Item.HidePlayers").split(":");
-			id2 = Integer.valueOf(array[0]);
-			subID2 = Integer.valueOf(array[1]);
-		} else {
-			id2 = Integer.valueOf(JNR.data.getString("Item.HidePlayers"));
-		}
-
-		if (JNR.data.getString("Item.Quit").contains(":")) {
-			String[] array = JNR.data.getString("Item.Quit").split(":");
-			id3 = Integer.valueOf(array[0]);
-			subID3 = Integer.valueOf(array[1]);
-		} else {
-			id3 = Integer.valueOf(JNR.data.getString("Item.Quit"));
-		}
-
-		String checkName = JNR.messages.getString("Item.BackToLastCheckpoint.Name").replaceAll("&", "§");
-		String showName = JNR.messages.getString("Item.HidePlayers.Name").replaceAll("&", "§");
-		String quitName = JNR.messages.getString("Item.Quit.Name").replaceAll("&", "§");
-
-		ItemStack check = new ItemStack(id, 1, (byte) subID);
-		ItemMeta check1 = check.getItemMeta();
-		check1.setDisplayName(checkName);
-		check.setItemMeta(check1);
-
-		ItemStack show = new ItemStack(id2, 1, (byte) subID2);
-		ItemMeta show1 = show.getItemMeta();
-		show1.setDisplayName(showName);
-		show.setItemMeta(show1);
-
-		ItemStack leave = new ItemStack(id3, 1, (byte) subID3);
-		ItemMeta leave1 = leave.getItemMeta();
-		leave1.setDisplayName(quitName);
-		leave.setItemMeta(leave1);
-
-		new org.bukkit.scheduler.BukkitRunnable() {
-			public void run() {
-				p.getInventory().setItem(0, check);
-				p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
+			if (JNR.data.getString("Item.BackToLastCheckpoint").contains(":")) {
+				String[] array = JNR.data.getString("Item.BackToLastCheckpoint").split(":");
+				id = array[0];
+				subID = Integer.valueOf(array[1]);
+			} else {
+				id = JNR.data.getString("Item.BackToLastCheckpoint");
 			}
-		}.runTaskLater(JNR.getInstance(), 5L);
 
-		new org.bukkit.scheduler.BukkitRunnable() {
-			public void run() {
-				p.getInventory().setItem(1, show);
-				p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
+			if (JNR.data.getString("Item.HidePlayers").contains(":")) {
+				String[] array = JNR.data.getString("Item.HidePlayers").split(":");
+				id2 = array[0];
+				subID2 = Integer.valueOf(array[1]);
+			} else {
+				id2 = JNR.data.getString("Item.HidePlayers");
 			}
-		}.runTaskLater(JNR.getInstance(), 10L);
 
-		new org.bukkit.scheduler.BukkitRunnable() {
-			public void run() {
-				p.getInventory().setItem(8, leave);
-				p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
+			if (JNR.data.getString("Item.Quit").contains(":")) {
+				String[] array = JNR.data.getString("Item.Quit").split(":");
+				id3 = array[0];
+				subID3 = Integer.valueOf(array[1]);
+			} else {
+				id3 = JNR.data.getString("Item.Quit");
 			}
-		}.runTaskLater(JNR.getInstance(), 15L);
+
+			String checkName = JNR.messages.getString("Item.BackToLastCheckpoint.Name").replaceAll("&", "§");
+			String showName = JNR.messages.getString("Item.HidePlayers.Name").replaceAll("&", "§");
+			String quitName = JNR.messages.getString("Item.Quit.Name").replaceAll("&", "§");
+
+			ItemStack check = new ItemStack(Material.getMaterial(id), 1, (byte) subID);
+			ItemMeta check1 = check.getItemMeta();
+			check1.setDisplayName(checkName);
+			check.setItemMeta(check1);
+
+			ItemStack show = new ItemStack(Material.getMaterial(id2), 1, (byte) subID2);
+			ItemMeta show1 = show.getItemMeta();
+			show1.setDisplayName(showName);
+			show.setItemMeta(show1);
+
+			ItemStack leave = new ItemStack(Material.getMaterial(id3), 1, (byte) subID3);
+			ItemMeta leave1 = leave.getItemMeta();
+			leave1.setDisplayName(quitName);
+			leave.setItemMeta(leave1);
+
+			new org.bukkit.scheduler.BukkitRunnable() {
+				public void run() {
+					p.getInventory().setItem(0, check);
+					try {
+						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
+					} catch (NoSuchFieldError e) {
+						p.playSound(p.getLocation(), Sound.valueOf("ENTITY_ITEM_PICKUP"), 1.0F, 1.0F);
+					}
+				}
+			}.runTaskLater(JNR.getInstance(), 5L);
+
+			new org.bukkit.scheduler.BukkitRunnable() {
+				public void run() {
+					p.getInventory().setItem(1, show);
+					try {
+						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
+					} catch (NoSuchFieldError e) {
+						p.playSound(p.getLocation(), Sound.valueOf("ENTITY_ITEM_PICKUP"), 1.0F, 1.0F);
+					}
+				}
+			}.runTaskLater(JNR.getInstance(), 10L);
+
+			new org.bukkit.scheduler.BukkitRunnable() {
+				public void run() {
+					p.getInventory().setItem(8, leave);
+					try {
+						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
+					} catch (NoSuchFieldError e) {
+						p.playSound(p.getLocation(), Sound.valueOf("ENTITY_ITEM_PICKUP"), 1.0F, 1.0F);
+					}
+				}
+			}.runTaskLater(JNR.getInstance(), 15L);
+		} catch (Exception e) {
+			WinListener.reset(p);
+
+			if (p.hasPermission("jnr.admin")) {
+				p.sendMessage(JNR.prefix
+						+ "§cUpdate v3.6.0 - Du musst die JumpAndRun Items neu setzen. [§4/jnr item <checkpoint/hide/unhide/quit>§c]");
+			} else {
+				p.sendMessage(JNR.prefix
+						+ "§cDieses JumpAndRun kann momentan nicht gespielt werden. Bitte melde dich bei einem §4Admin§c.");
+			}
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -316,8 +345,7 @@ public class StartListener implements Listener {
 							.replaceAll("%time%", JNRCommand.calculateTimeInSeconds(time))
 							.replaceAll("%fails%", StartListener.fails.get(p.getName()).toString());
 
-					ActionBar actionBar = new ActionBar(abText);
-					actionBar.sendToPlayer(p);
+					ActionBar.sendActionbar(p, abText);
 				} else {
 					return;
 				}

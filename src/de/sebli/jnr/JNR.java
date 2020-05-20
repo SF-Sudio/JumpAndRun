@@ -2,6 +2,8 @@ package de.sebli.jnr;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -50,7 +52,7 @@ public class JNR extends JavaPlugin {
 		loadCommands();
 		loadListeners();
 		loadFiles();
-
+		
 //		if (data.getBoolean("EnableVault")) {
 //			try {
 //				setupEconomy();
@@ -140,16 +142,16 @@ public class JNR extends JavaPlugin {
 
 		// INGAME ITEMS
 		if (!data.contains("Item.BackToLastCheckpoint")) {
-			data.set("Item.BackToLastCheckpoint", "331");
+			data.set("Item.BackToLastCheckpoint", "REDSTONE");
 		}
 		if (!data.contains("Item.HidePlayers")) {
-			data.set("Item.HidePlayers", "348");
+			data.set("Item.HidePlayers", "INK_SACK:10");
 		}
 		if (!data.contains("Item.ShowPlayers")) {
-			data.set("Item.ShowPlayers", "289");
+			data.set("Item.ShowPlayers", "INK_SACK:8");
 		}
 		if (!data.contains("Item.Quit")) {
-			data.set("Item.Quit", "341");
+			data.set("Item.Quit", "SLIME_BALL");
 		}
 
 		// MOVING SETTINGS FROM THE DATA.YML TO THE CONFIG.YML
@@ -193,7 +195,8 @@ public class JNR extends JavaPlugin {
 		messages.options().header(
 				"Vault wird nicht mehr unterstützt. Nutze eine ältere Version, wenn du das Plugin mit Vault nutzen möchtest."
 						+ "\nSchreibe ein 'x' statt einer Nachricht, um die Nachricht zu deaktivieren. (Der Spieler bekommt dann, wenn die Nachricht eigentlich erscheinen sollte, keine Nachricht mehr.)"
-						+ "\nWenn du einen Titel ('Title') deaktivieren möchtest, musst du beide Felder ('1' und '2') frei lassen, dann wird dem Spieler der Titel nicht mehr angezeigt.");
+						+ "\nWenn du einen Titel ('Title') deaktivieren möchtest, musst du beide Felder ('1' und '2') frei lassen, dann wird dem Spieler der Titel nicht mehr angezeigt."
+						+ "\nBei 'Messages.Win.Stats' kannst du beliebig viele Nachrichten hinzufügen (einfach das Format beibehalten, d.h. für jede Nachricht eine extra Zeile mit '-' + Nachricht)");
 
 		// PREFIX
 		if (!messages.contains("Prefix")) {
@@ -280,6 +283,18 @@ public class JNR extends JavaPlugin {
 		if (!messages.contains("Messages.Win.Title.2")) {
 			messages.set("Messages.Win.Title.2", "&6%map% abgeschlossen.");
 		}
+		if (!messages.contains("Messages.Win.Stats")) {
+			List<String> list = new ArrayList<>();
+			list.add("&8===============");
+			list.add("");
+			list.add("&aMap&7: &6%map%");
+			list.add("&aZeit&7: %time%");
+			list.add("&aFails&7: &6%fails%");
+			list.add("");
+			list.add("&8===============");
+
+			messages.set("Messages.Win.Stats", list);
+		}
 
 //		if (!messages.contains("Messages.Win.Title.Vault.1")) {
 //			messages.set("Messages.Win.Title.Vault.1", "&aHerzlichen Glückwunsch!");
@@ -310,6 +325,30 @@ public class JNR extends JavaPlugin {
 //			messages.set("Messages.BonusForNewRecord.Vault",
 //					"&aDu hast zusätzliche &6%bonus%%moneyName% &afür den neuen Rekord erhalten.");
 //		}
+
+		// COMMAND MESSAGES
+		if (!messages.contains("Messages.Command.Stats.Player")) {
+			List<String> list = new ArrayList<>();
+			list.add("&8======&6JumpAndRun&8======");
+			list.add("");
+			list.add("&7JumpAndRun: &6%map%");
+			list.add("&7Angefangene Runden: &6%playedTimes%");
+			list.add("&7Abgeschlossene Runden: &6%finishedTimes%");
+			list.add("&7Fails: &6%fails%");
+			list.add("&7Rekordzeit: &6%recordTime%");
+			list.add("&7Globale Rekordzeit: &6%globalRecordTime%");
+			list.add("");
+			list.add("&8=====&9Stats von &c%player%&8=====");
+
+			messages.set("Messages.Command.Stats.Player", list);
+		}
+		if (!messages.contains("Messages.Command.Stats.NoRecord")) {
+			messages.set("Messages.Command.Stats.NoRecord", "&6Du hast noch keinen Rekord auf dieser Map aufgestellt.");
+		}
+		if (!messages.contains("Messages.Command.Stats.NoGlobalRecord")) {
+			messages.set("Messages.Command.Stats.NoGlobalRecord",
+					"&6Es wurde auf dieser Map noch kein Rekord aufgestellt.");
+		}
 
 		try {
 			messages.save(file4);

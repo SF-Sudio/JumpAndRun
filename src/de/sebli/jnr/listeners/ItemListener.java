@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,57 +25,56 @@ public class ItemListener implements Listener {
 	HashMap<String, Long> wait2 = new HashMap<>();
 	HashMap<String, Long> wait3 = new HashMap<>();
 
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onInteract(PlayerInteractEvent e) {
 		Player p = e.getPlayer();
 
 		if (StartListener.playing.containsKey(p.getName())) {
-			if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+			if (e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_AIR) {
 				String itemCooldownMsg = JNR.messages.getString("Messages.ItemCooldown").replaceAll("&", "§");
 
-				int id = 0;
+				String id = "AIR";
 				int subID = 0;
 
-				int id2 = 0;
+				String id2 = "AIR";
 				int subID2 = 0;
 
-				int id3 = 0;
+				String id3 = "AIR";
 				int subID3 = 0;
 
-				int id4 = 0;
+				String id4 = "AIR";
 				int subID4 = 0;
 
 				if (JNR.data.getString("Item.BackToLastCheckpoint").contains(":")) {
 					String[] array = JNR.data.getString("Item.BackToLastCheckpoint").split(":");
-					id = Integer.valueOf(array[0]);
+					id = array[0];
 					subID = Integer.valueOf(array[1]);
 				} else {
-					id = Integer.valueOf(JNR.data.getString("Item.BackToLastCheckpoint"));
+					id = JNR.data.getString("Item.BackToLastCheckpoint");
 				}
 
 				if (JNR.data.getString("Item.HidePlayers").contains(":")) {
 					String[] array = JNR.data.getString("Item.HidePlayers").split(":");
-					id2 = Integer.valueOf(array[0]);
+					id2 = array[0];
 					subID2 = Integer.valueOf(array[1]);
 				} else {
-					id2 = Integer.valueOf(JNR.data.getString("Item.HidePlayers"));
+					id2 = JNR.data.getString("Item.HidePlayers");
 				}
 
 				if (JNR.data.getString("Item.ShowPlayers").contains(":")) {
 					String[] array = JNR.data.getString("Item.ShowPlayers").split(":");
-					id3 = Integer.valueOf(array[0]);
+					id3 = array[0];
 					subID3 = Integer.valueOf(array[1]);
 				} else {
-					id3 = Integer.valueOf(JNR.data.getString("Item.ShowPlayers"));
+					id3 = JNR.data.getString("Item.ShowPlayers");
 				}
 
 				if (JNR.data.getString("Item.Quit").contains(":")) {
 					String[] array = JNR.data.getString("Item.Quit").split(":");
-					id4 = Integer.valueOf(array[0]);
+					id4 = array[0];
 					subID4 = Integer.valueOf(array[1]);
 				} else {
-					id4 = Integer.valueOf(JNR.data.getString("Item.Quit"));
+					id4 = JNR.data.getString("Item.Quit");
 				}
 
 				String checkName = JNR.messages.getString("Item.BackToLastCheckpoint.Name").replaceAll("&", "§");
@@ -83,22 +82,22 @@ public class ItemListener implements Listener {
 				String hideName = JNR.messages.getString("Item.ShowPlayers.Name").replaceAll("&", "§");
 				String quitName = JNR.messages.getString("Item.Quit.Name").replaceAll("&", "§");
 
-				ItemStack check = new ItemStack(id, 1, (byte) subID);
+				ItemStack check = new ItemStack(Material.getMaterial(id), 1, (byte) subID);
 				ItemMeta check1 = check.getItemMeta();
 				check1.setDisplayName(checkName);
 				check.setItemMeta(check1);
 
-				ItemStack show = new ItemStack(id2, 1, (byte) subID2);
+				ItemStack show = new ItemStack(Material.getMaterial(id2), 1, (byte) subID2);
 				ItemMeta show1 = show.getItemMeta();
 				show1.setDisplayName(showName);
 				show.setItemMeta(show1);
 
-				ItemStack hide = new ItemStack(id3, 1, (byte) subID3);
+				ItemStack hide = new ItemStack(Material.getMaterial(id3), 1, (byte) subID3);
 				ItemMeta hide1 = hide.getItemMeta();
 				hide1.setDisplayName(hideName);
 				hide.setItemMeta(hide1);
 
-				ItemStack leave = new ItemStack(id4, 1, (byte) subID4);
+				ItemStack leave = new ItemStack(Material.getMaterial(id4), 1, (byte) subID4);
 				ItemMeta leave1 = leave.getItemMeta();
 				leave1.setDisplayName(quitName);
 				leave.setItemMeta(leave1);
@@ -112,7 +111,6 @@ public class ItemListener implements Listener {
 						hidePlayer(p);
 						wait2.put(p.getName(), millis);
 					} else if (wait2.containsKey(p.getName())) {
-
 						Long last = wait2.get(p.getName());
 
 						if (last + 500 > millis) {
@@ -131,7 +129,6 @@ public class ItemListener implements Listener {
 						showPlayer(p);
 						wait3.put(p.getName(), millis);
 					} else if (wait3.containsKey(p.getName())) {
-
 						Long last = wait3.get(p.getName());
 
 						if (last + 500 > millis) {
@@ -183,8 +180,7 @@ public class ItemListener implements Listener {
 				.replaceAll("%time%", JNRCommand.calculateTimeInSeconds(time))
 				.replaceAll("%fails%", StartListener.fails.get(p.getName()).toString());
 
-		ActionBar actionBar = new ActionBar(abText);
-		actionBar.sendToPlayer(p);
+		ActionBar.sendActionbar(p, abText);
 
 		try {
 			JNR.stats.save(JNR.file3);
@@ -218,25 +214,24 @@ public class ItemListener implements Listener {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	private void hidePlayer(Player p) {
 		for (Player all : Bukkit.getOnlinePlayers()) {
 			p.hidePlayer(all);
 		}
-		int id3 = 0;
+		String id3 = "AIR";
 		int subID3 = 0;
 
 		if (JNR.data.getString("Item.ShowPlayers").contains(":")) {
 			String[] array = JNR.data.getString("Item.ShowPlayers").split(":");
-			id3 = Integer.valueOf(array[0]);
+			id3 = array[0];
 			subID3 = Integer.valueOf(array[1]);
 		} else {
-			id3 = Integer.valueOf(JNR.data.getString("Item.ShowPlayers"));
+			id3 = JNR.data.getString("Item.ShowPlayers");
 		}
 
 		String hideName = JNR.messages.getString("Item.ShowPlayers.Name").replaceAll("&", "§");
 
-		ItemStack hide = new ItemStack(id3, 1, (byte) subID3);
+		ItemStack hide = new ItemStack(Material.getMaterial(id3), 1, (byte) subID3);
 		ItemMeta hide1 = hide.getItemMeta();
 		hide1.setDisplayName(hideName);
 		hide.setItemMeta(hide1);
@@ -244,25 +239,24 @@ public class ItemListener implements Listener {
 		p.getInventory().setItem(1, hide);
 	}
 
-	@SuppressWarnings("deprecation")
 	private void showPlayer(Player p) {
 		for (Player all : Bukkit.getOnlinePlayers()) {
 			p.hidePlayer(all);
 		}
-		int id2 = 0;
+		String id2 = "AIR";
 		int subID2 = 0;
 
 		if (JNR.data.getString("Item.HidePlayers").contains(":")) {
 			String[] array = JNR.data.getString("Item.HidePlayers").split(":");
-			id2 = Integer.valueOf(array[0]);
+			id2 = array[0];
 			subID2 = Integer.valueOf(array[1]);
 		} else {
-			id2 = Integer.valueOf(JNR.data.getString("Item.HidePlayers"));
+			id2 = JNR.data.getString("Item.HidePlayers");
 		}
 
 		String showName = JNR.messages.getString("Item.HidePlayers.Name").replaceAll("&", "§");
 
-		ItemStack show = new ItemStack(id2, 1, (byte) subID2);
+		ItemStack show = new ItemStack(Material.getMaterial(id2), 1, (byte) subID2);
 		ItemMeta show1 = show.getItemMeta();
 		show1.setDisplayName(showName);
 		show.setItemMeta(show1);
@@ -272,64 +266,6 @@ public class ItemListener implements Listener {
 
 	public static void quit(Player p) {
 		WinListener.reset(p);
-	}
-
-	@SuppressWarnings("deprecation")
-	public static void quickQuit(Player p) {
-		String jnr = StartListener.playing.get(p.getName());
-
-		p.setGameMode(GameMode.getByValue(JNR.playerData.getInt(p.getName() + ".Gamemode")));
-		p.setHealth(JNR.playerData.getDouble(p.getName() + ".Health"));
-		p.setFoodLevel(JNR.playerData.getInt(p.getName() + ".FoodLevel"));
-
-		p.getInventory().setContents((ItemStack[]) JNR.playerData.get(p.getName() + ".Inv"));
-		p.updateInventory();
-
-		JNR.playerData.set(p.getName(), null);
-
-		StartListener.cooldown.remove(p.getName());
-
-		try {
-			JNR.playerData.save(JNR.file2);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-
-		if (!JNR.data.contains(jnr + ".Leave")) {
-			World world = Bukkit.getWorld(JNR.playerData.getString("Location." + p.getName() + ".World"));
-			double x = JNR.playerData.getDouble("Location." + p.getName() + ".X");
-			double y = JNR.playerData.getDouble("Location." + p.getName() + ".Y");
-			double z = JNR.playerData.getDouble("Location." + p.getName() + ".Z");
-			float yaw = (float) JNR.playerData.getDouble("Location." + p.getName() + ".Yaw");
-			float pitch = (float) JNR.playerData.getDouble("Location." + p.getName() + ".Pitch");
-
-			Location loc = new Location(world, x, y, z, yaw, pitch);
-
-			p.teleport(loc);
-
-			JNR.playerData.set("Location." + p.getName(), null);
-
-			try {
-				JNR.playerData.save(JNR.file2);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-		} else {
-			World world = Bukkit.getWorld(JNR.data.getString(jnr + ".Leave.World"));
-			double x = JNR.data.getDouble(jnr + ".Leave.X");
-			double y = JNR.data.getDouble(jnr + ".Leave.Y");
-			double z = JNR.data.getDouble(jnr + ".Leave.Z");
-			float yaw = (float) JNR.data.getDouble(jnr + ".Leave.Yaw");
-			float pitch = (float) JNR.data.getDouble(jnr + ".Leave.Pitch");
-
-			Location loc = new Location(world, x, y, z, yaw, pitch);
-
-			p.teleport(loc);
-		}
-
-		for (Player all : Bukkit.getOnlinePlayers()) {
-			p.showPlayer(all);
-		}
 	}
 
 }

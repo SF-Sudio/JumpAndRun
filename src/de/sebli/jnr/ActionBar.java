@@ -1,22 +1,36 @@
 package de.sebli.jnr;
 
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.entity.Player;
+import java.lang.reflect.Constructor;
 
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 public class ActionBar {
 
-	private PacketPlayOutChat packet;
+	public static void sendActionbar(Player player, String msg) {
+		try {
+			Constructor<?> constructor = getNMSClass("PacketPlayOutChat")
+					.getConstructor(getNMSClass("IChatBaseComponent"), getNMSClass("ChatMessageType"));
 
-	public ActionBar(String text) {
-		PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + text + "\"}"), (byte) 2);
-		this.packet = packet;
+			Object icbc = getNMSClass("IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class)
+					.invoke(null, "{\"text\":\"" + msg + "\"}");
+			Object packet = constructor.newInstance(icbc, getNMSClass("ChatMessageType").getEnumConstants()[2]);
+			Object entityPlayer = player.getClass().getMethod("getHandle").invoke(player);
+			Object playerConnection = entityPlayer.getClass().getField("playerConnection").get(entityPlayer);
+
+			playerConnection.getClass().getMethod("sendPacket", getNMSClass("Packet")).invoke(playerConnection, packet);
+		} catch (Exception e) {
+			ActionBar18.sendToPlayer(player, msg);
+		}
 	}
 
-	public void sendToPlayer(Player p) {
-		((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+	public static Class<?> getNMSClass(String name) {
+		try {
+			return Class.forName("net.minecraft.server."
+					+ Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3] + "." + name);
+		} catch (ClassNotFoundException e) {
+			return null;
+		}
 	}
 
 }

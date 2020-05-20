@@ -85,13 +85,13 @@ public class WinListener implements Listener {
 					int fails = StartListener.fails.get(p.getName());
 					long time = (System.nanoTime() - StartListener.time.get(p.getName())) / 1000000;
 
-					p.sendMessage("§8===============");
-					p.sendMessage("");
-					p.sendMessage("§aMap§7: §6" + jnr);
-					p.sendMessage("§aZeit§7: " + JNRCommand.calculateTime(time));
-					p.sendMessage("§aFails§7: §6" + fails);
-					p.sendMessage("");
-					p.sendMessage("§8===============");
+					List<String> finishedStats = JNR.messages.getStringList("Messages.Win.Stats");
+
+					for (String message : finishedStats) {
+						p.sendMessage(message.replaceAll("&", "§").replaceAll("%map%", jnr)
+								.replaceAll("%time%", JNRCommand.calculateTime(time))
+								.replaceAll("%fails%", String.valueOf(fails)));
+					}
 
 					JNR.stats.set(p.getName() + "." + jnr + ".fails", fails);
 
@@ -219,7 +219,11 @@ public class WinListener implements Listener {
 								.replaceAll("%checkpoint%", StartListener.checkpoint.get(p.getName()).toString());
 						p.sendTitle(cpReached1, cpReached2);
 						StartListener.checkpoint.put(p.getName(), StartListener.checkpoint.get(p.getName()) + 1);
-						p.playSound(p.getLocation(), Sound.LEVEL_UP, 1.0F, 1.0F);
+						try {
+							p.playSound(p.getLocation(), Sound.LEVEL_UP, 1.0F, 1.0F);
+						} catch (NoSuchFieldError ex) {
+							p.playSound(p.getLocation(), Sound.valueOf("ENTITY_PLAYER_LEVELUP"), 1.0F, 1.0F);
+						}
 
 						getCPTime(p);
 					}
@@ -241,7 +245,11 @@ public class WinListener implements Listener {
 								.replaceAll("&", "§")
 								.replaceAll("%checkpoint%", StartListener.checkpoint.get(p.getName()).toString());
 						p.sendTitle(cpReached1, cpReached2);
-						p.playSound(p.getLocation(), Sound.LEVEL_UP, 1.0F, 1.0F);
+						try {
+							p.playSound(p.getLocation(), Sound.LEVEL_UP, 1.0F, 1.0F);
+						} catch (NoSuchFieldError ex) {
+							p.playSound(p.getLocation(), Sound.valueOf("ENTITY_PLAYER_LEVELUP"), 1.0F, 1.0F);
+						}
 					}
 
 					getCPTime(p);
@@ -390,7 +398,6 @@ public class WinListener implements Listener {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@EventHandler
 	public void onBreak(BlockBreakEvent e) {
 		if (StartListener.playing.containsKey(e.getPlayer().getName())) {
@@ -403,16 +410,19 @@ public class WinListener implements Listener {
 			if (sign.getLine(0).isEmpty())
 				return;
 
-			List<Location> signLocs = new ArrayList<>();
+			List<String> signLocs = new ArrayList<>();
 
-			if (JNR.data.contains(sign.getLine(1) + ".JoinSign")) {
-				signLocs = (List<Location>) JNR.data.getList(sign.getLine(1) + ".JoinSign");
+			if (JNR.data.contains("JoinSign." + sign.getLine(1))) {
+				signLocs = JNR.data.getStringList("JoinSign." + sign.getLine(1));
 			}
 
-			if (signLocs.contains(sign.getLocation())) {
-				signLocs.remove(sign.getLocation());
+			String signLocStr = sign.getLocation().getWorld().getName() + " : " + sign.getLocation().getX() + ", "
+					+ sign.getLocation().getY() + ", " + sign.getLocation().getZ();
 
-				JNR.data.set(sign.getLine(1) + ".JoinSign", signLocs);
+			if (signLocs.contains(signLocStr)) {
+				signLocs.remove(signLocStr);
+
+				JNR.data.set("JoinSign." + sign.getLine(1), signLocs);
 
 				try {
 					JNR.data.save(JNR.file);

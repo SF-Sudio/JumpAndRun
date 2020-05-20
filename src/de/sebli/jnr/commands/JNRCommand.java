@@ -2,6 +2,7 @@ package de.sebli.jnr.commands;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -172,24 +173,24 @@ public class JNRCommand implements CommandExecutor {
 						} else if (args[0].equalsIgnoreCase("item")) {
 							if (p.getItemInHand() != null && p.getItemInHand().getType().getId() != 0) {
 								if (args[1].equalsIgnoreCase("checkpoint")) {
-									JNR.data.set("Item.BackToLastCheckpoint", p.getItemInHand().getType().getId() + ":"
+									JNR.data.set("Item.BackToLastCheckpoint", p.getItemInHand().getType().toString() + ":"
 											+ p.getItemInHand().getData().getData());
-									saveFile(p, "§7BackToLastCheckpoint Item -> " + p.getItemInHand().getType().getId()
+									saveFile(p, "§7BackToLastCheckpoint Item -> " + p.getItemInHand().getType().toString()
 											+ ":" + p.getItemInHand().getData().getData());
 								} else if (args[1].equalsIgnoreCase("hide")) {
-									JNR.data.set("Item.HidePlayers", p.getItemInHand().getType().getId() + ":"
+									JNR.data.set("Item.HidePlayers", p.getItemInHand().getType().toString() + ":"
 											+ p.getItemInHand().getData().getData());
-									saveFile(p, "§7HidePlayers Item -> " + p.getItemInHand().getType().getId() + ":"
+									saveFile(p, "§7HidePlayers Item -> " + p.getItemInHand().getType().toString() + ":"
 											+ p.getItemInHand().getData().getData());
 								} else if (args[1].equalsIgnoreCase("unhide")) {
-									JNR.data.set("Item.ShowPlayers", p.getItemInHand().getType().getId() + ":"
+									JNR.data.set("Item.ShowPlayers", p.getItemInHand().getType().toString() + ":"
 											+ p.getItemInHand().getData().getData());
-									saveFile(p, "§7ShowPlayers Item -> " + p.getItemInHand().getType().getId() + ":"
+									saveFile(p, "§7ShowPlayers Item -> " + p.getItemInHand().getType().toString() + ":"
 											+ p.getItemInHand().getData().getData());
 								} else if (args[1].equalsIgnoreCase("quit")) {
-									JNR.data.set("Item.Quit", p.getItemInHand().getType().getId() + ":"
+									JNR.data.set("Item.Quit", p.getItemInHand().getType().toString() + ":"
 											+ p.getItemInHand().getData().getData());
-									saveFile(p, "§7Quit Item -> " + p.getItemInHand().getType().getId() + ":"
+									saveFile(p, "§7Quit Item -> " + p.getItemInHand().getType().toString() + ":"
 											+ p.getItemInHand().getData().getData());
 								} else {
 									sendHelp(p, args[0]);
@@ -468,61 +469,128 @@ public class JNRCommand implements CommandExecutor {
 				String gbt = calculateTime(globalRecordTime);
 
 				try {
-					executor.sendMessage("§8======§6JumpAndRun§8======");
-					executor.sendMessage("");
-					executor.sendMessage("§7JumpAndRun: §6" + map);
-					executor.sendMessage("§7Angefangene Runden: §6" + playedTimes);
-					executor.sendMessage("§7Abgeschlossene Runden: §6" + finishedTimes);
-					executor.sendMessage("§7Fails: §6" + fails);
-					if (JNR.stats.getInt(name + "." + map + ".bestTime") == 0.0) {
-						executor.sendMessage("§7Rekordzeit: §6---");
-					} else {
-						executor.sendMessage("§7Rekordzeit: §6" + bt);
+					List<String> statsList = JNR.messages.getStringList("Messages.Command.Stats.Player");
+
+					for (String message : statsList) {
+						message = message.replaceAll("&", "§")
+								.replaceAll("%finishedTimes%", String.valueOf(finishedTimes))
+								.replaceAll("%playedTimes%", String.valueOf(playedTimes))
+								.replaceAll("%fails%", String.valueOf(fails))
+								.replaceAll("%recordTime%", String.valueOf(bt)).replaceAll("%map%", map)
+								.replaceAll("%player%", name);
+
+						if (JNR.stats.getInt(name + "." + map + ".bestTime") == 0.0) {
+							message = message.replaceAll("%recordTime%",
+									JNR.messages.getString("Messages.Command.Stats.NoRecord").replaceAll("&", "§"));
+						} else {
+							message = message.replaceAll("%recordTime%", bt);
+						}
+
+						if (!JNR.stats.contains(map + ".globalBestTime")
+								|| JNR.stats.getInt(map + ".globalBestTime") == 0.0) {
+							message = message.replaceAll("%globalRecordTime%", JNR.messages
+									.getString("Messages.Command.Stats.NoGlobalRecord").replaceAll("&", "§"));
+						} else {
+							message = message.replaceAll("%globalRecordTime%", gbt);
+						}
+
+						executor.sendMessage(message);
 					}
-					if (!JNR.stats.contains(map + ".globalBestTime")
-							|| JNR.stats.getInt(map + ".globalBestTime") == 0.0) {
-						executor.sendMessage(
-								"§7Globale Rekordzeit: §6Es wurde auf dieser Map noch kein Rekord aufgestellt.");
-					} else {
-						executor.sendMessage("§7Globale Rekordzeit: §6" + gbt);
-					}
-					executor.sendMessage("");
-					executor.sendMessage("§8=====§9Stats von §c" + name + "§8=====");
+
+//					executor.sendMessage("§8======§6JumpAndRun§8======");
+//					executor.sendMessage("");
+//					executor.sendMessage("§7JumpAndRun: §6" + map);
+//					executor.sendMessage("§7Angefangene Runden: §6" + playedTimes);
+//					executor.sendMessage("§7Abgeschlossene Runden: §6" + finishedTimes);
+//					executor.sendMessage("§7Fails: §6" + fails);
+//					if (JNR.stats.getInt(name + "." + map + ".bestTime") == 0.0) {
+//						executor.sendMessage("§7Rekordzeit: §6---");
+//					} else {
+//						executor.sendMessage("§7Rekordzeit: §6" + bt);
+//					}
+//					if (!JNR.stats.contains(map + ".globalBestTime")
+//							|| JNR.stats.getInt(map + ".globalBestTime") == 0.0) {
+//						executor.sendMessage(
+//								"§7Globale Rekordzeit: §6Es wurde auf dieser Map noch kein Rekord aufgestellt.");
+//					} else {
+//						executor.sendMessage("§7Globale Rekordzeit: §6" + gbt);
+//					}
+//					executor.sendMessage("");
+//					executor.sendMessage("§8=====§9Stats von §c" + name + "§8=====");
 				} catch (Exception e) {
-					executor.sendMessage("§8======§6JumpAndRun§8======");
-					executor.sendMessage("");
-					executor.sendMessage("§7JumpAndRun: §6" + map);
-					executor.sendMessage("§7Angefangene Runden: §6" + 0);
-					executor.sendMessage("§7Abgeschlossene Runden: §6" + 0);
-					executor.sendMessage("§7Fails: §6" + 0);
-					executor.sendMessage("§7Rekordzeit: §6---");
-					if (!JNR.stats.contains(map + ".globalBestTime")
-							|| JNR.stats.getInt(map + ".globalBestTime") == 0.0) {
-						executor.sendMessage(
-								"§7Globale Rekordzeit: §6Es wurde auf dieser Map noch kein Rekord aufgestellt.");
-					} else {
-						executor.sendMessage("§7Globale Rekordzeit: §6" + gbt);
+					List<String> statsList = JNR.messages.getStringList("Messages.Command.Stats.Player");
+
+					for (String message : statsList) {
+						message = message.replaceAll("&", "§").replaceAll("%finishedTimes%", String.valueOf(0))
+								.replaceAll("%playedTimes%", String.valueOf(0)).replaceAll("%fails%", String.valueOf(0))
+								.replaceAll("%recordTime%",
+										JNR.messages.getString("Messages.Command.Stats.NoRecord").replaceAll("&", "§"))
+								.replaceAll("%player%", name).replaceAll("%map%", map);
+
+						if (!JNR.stats.contains(map + ".globalBestTime")
+								|| JNR.stats.getInt(map + ".globalBestTime") == 0.0) {
+							message = message.replaceAll("%globalRecordTime%", JNR.messages
+									.getString("Messages.Command.Stats.NoGlobalRecord").replaceAll("&", "§"));
+						} else {
+							message = message.replaceAll("%globalRecordTime%", gbt);
+						}
+
+						executor.sendMessage(message);
 					}
-					executor.sendMessage("");
-					executor.sendMessage("§8=====§9Stats von §c" + name + "§8=====");
+
+//					executor.sendMessage("§8======§6JumpAndRun§8======");
+//					executor.sendMessage("");
+//					executor.sendMessage("§7JumpAndRun: §6" + map);
+//					executor.sendMessage("§7Angefangene Runden: §6" + 0);
+//					executor.sendMessage("§7Abgeschlossene Runden: §6" + 0);
+//					executor.sendMessage("§7Fails: §6" + 0);
+//					executor.sendMessage("§7Rekordzeit: §6---");
+//					if (!JNR.stats.contains(map + ".globalBestTime")
+//							|| JNR.stats.getInt(map + ".globalBestTime") == 0.0) {
+//						executor.sendMessage(
+//								"§7Globale Rekordzeit: §6Es wurde auf dieser Map noch kein Rekord aufgestellt.");
+//					} else {
+//						executor.sendMessage("§7Globale Rekordzeit: §6" + gbt);
+//					}
+//					executor.sendMessage("");
+//					executor.sendMessage("§8=====§9Stats von §c" + name + "§8=====");
 				}
 			} else {
-				executor.sendMessage("§8======§6JumpAndRun§8======");
-				executor.sendMessage("");
-				executor.sendMessage("§7JumpAndRun: §6" + map);
-				executor.sendMessage("§7Angefangene Runden: §6" + 0);
-				executor.sendMessage("§7Abgeschlossene Runden: §6" + 0);
-				executor.sendMessage("§7Fails: §6" + 0);
-				executor.sendMessage("§7Rekordzeit: §6---");
-				if (!JNR.stats.contains(map + ".globalBestTime") || JNR.stats.getInt(map + ".globalBestTime") == 0.0) {
-					executor.sendMessage(
-							"§7Globale Rekordzeit: §6Es wurde auf dieser Map noch kein Rekord aufgestellt.");
-				} else {
-					executor.sendMessage(
-							"§7Globale Rekordzeit: §6" + calculateTime(JNR.stats.getDouble(map + ".globalBestTime")));
+				List<String> statsList = JNR.messages.getStringList("Messages.Command.Stats.Player");
+
+				for (String message : statsList) {
+					message = message.replaceAll("&", "§").replaceAll("%finishedTimes%", String.valueOf(0))
+							.replaceAll("%playedTimes%", String.valueOf(0)).replaceAll("%fails%", String.valueOf(0))
+							.replaceAll("%recordTime%", "---").replaceAll("%player%", name).replaceAll("%map%", map);
+
+					if (!JNR.stats.contains(map + ".globalBestTime")
+							|| JNR.stats.getInt(map + ".globalBestTime") == 0.0) {
+						message = message.replaceAll("%globalRecordTime%",
+								JNR.messages.getString("Messages.Command.Stats.NoGlobalRecord").replaceAll("&", "§"));
+					} else {
+						message = message.replaceAll("%globalRecordTime%",
+								calculateTime(JNR.stats.getDouble(map + ".globalBestTime")));
+					}
+
+					executor.sendMessage(message);
 				}
-				executor.sendMessage("");
-				executor.sendMessage("§8=====§9Stats von §c" + name + "§8=====");
+
+//				executor.sendMessage("§8======§6JumpAndRun§8======");
+//				executor.sendMessage("");
+//				executor.sendMessage("§7JumpAndRun: §6" + map);
+//				executor.sendMessage("§7Angefangene Runden: §6" + 0);
+//				executor.sendMessage("§7Abgeschlossene Runden: §6" + 0);
+//				executor.sendMessage("§7Fails: §6" + 0);
+//				executor.sendMessage("§7Rekordzeit: §6---");
+//				if (!JNR.stats.contains(map + ".globalBestTime") || JNR.stats.getInt(map + ".globalBestTime") == 0.0) {
+//					executor.sendMessage(
+//							"§7Globale Rekordzeit: §6Es wurde auf dieser Map noch kein Rekord aufgestellt.");
+//				} else {
+//					executor.sendMessage(
+//							"§7Globale Rekordzeit: §6" + calculateTime(JNR.stats.getDouble(map + ".globalBestTime")));
+//				}
+//				executor.sendMessage("");
+//				executor.sendMessage("§8=====§9Stats von §c" + name + "§8=====");
 			}
 		} else {
 			executor.sendMessage("§cDie Map §e" + map + " §cexistiert nicht.");
