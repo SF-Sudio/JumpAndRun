@@ -15,6 +15,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import de.sebli.jnr.JNR;
+import de.sebli.jnr.Language;
 import de.sebli.jnr.listeners.StartListener;
 
 public class JNRCommand implements CommandExecutor {
@@ -23,7 +24,11 @@ public class JNRCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (!(sender instanceof Player)) {
-			sender.sendMessage("Du musst ein Spieler sein!");
+			if (Language.getLanguage().equalsIgnoreCase("german")) {
+				sender.sendMessage("Du musst ein Spieler sein!");
+			} else {
+				sender.sendMessage("You have to be a player!");
+			}
 		} else {
 			Player p = (Player) sender;
 			if (args.length == 1) {
@@ -44,7 +49,8 @@ public class JNRCommand implements CommandExecutor {
 //						}
 //					}
 
-					p.sendMessage(JNR.prefix + "§aPlugin erfolgreich neu geladen.");
+					Language.sendMessage(p, JNR.prefix + "§aConfigs reloaded.",
+							JNR.prefix + "§aConfigs erfolgreich neu geladen.");
 				} else {
 					sendHelp(p, args[0]);
 				}
@@ -89,11 +95,18 @@ public class JNRCommand implements CommandExecutor {
 							String name = args[1];
 							if (!JNR.data.contains(name)) {
 								JNR.data.set(name, "true");
-								saveFile(p, "§7JumpAndRun §a" + name + " §7erstellt.");
-								p.sendMessage("§4§lBitte vervollständige nun das Setup für dieses JumpAndRun.");
+								if (Language.getLanguage().equalsIgnoreCase("german")) {
+									saveFile(p, "§7JumpAndRun §a" + name + " §7erstellt.");
+								} else {
+									saveFile(p, "§7JumpAndRun §a" + name + " §7created.");
+								}
+								Language.sendMessage(p, "§4§lPlease complete the setup for this JumpAndRun now.",
+										"§4§lBitte vervollständige nun das Setup für dieses JumpAndRun.");
 							} else {
-								p.sendMessage(JNR.prefix + "§cEs gibt bereits ein JumpAndRun mit dem Namen '§e" + name
-										+ "§c'");
+								Language.sendMessage(p,
+										JNR.prefix + "§cThere is already a JumpAndRun named '§e" + name + "§c'",
+										JNR.prefix + "§cEs gibt bereits ein JumpAndRun mit dem Namen '§e" + name
+												+ "§c'");
 							}
 						} else if (args[0].equalsIgnoreCase("setspawn")) {
 							String name = args[1];
@@ -115,12 +128,19 @@ public class JNRCommand implements CommandExecutor {
 								JNR.data.set(name + ".Yaw", yaw);
 								JNR.data.set(name + ".Pitch", pitch);
 
-								saveFile(p, "§7Spawn-Punkt gesetzt.");
+								if (Language.getLanguage().equalsIgnoreCase("german")) {
+									saveFile(p, "§7Spawn-Punkt gesetzt.");
+								} else {
+									saveFile(p, "§7Spawn-Point set.");
+								}
 							} else {
-								p.sendMessage(JNR.prefix + "§cEin JumpAndRun mit dem Namen '§e" + name
-										+ "§c' existiert nicht!");
-								p.sendMessage(JNR.prefix + "§cBenutze: /jnr create " + name
-										+ " §cum das JumpAndRun zu erstellen!");
+								Language.sendMessage(p,
+										JNR.prefix + "§cThere is no JumpAndRun named '§e" + name + "§c'!", JNR.prefix
+												+ "§cEin JumpAndRun mit dem Namen '§e" + name + "§c' existiert nicht!");
+								Language.sendMessage(p,
+										JNR.prefix + "§cUse: /jnr create " + name + " §cto create this JumpAndRun!",
+										JNR.prefix + "§cBenutze: /jnr create " + name
+												+ " §cum das JumpAndRun zu erstellen!");
 							}
 						} else if (args[0].equalsIgnoreCase("setleave")) {
 							String name = args[1];
@@ -142,12 +162,19 @@ public class JNRCommand implements CommandExecutor {
 								JNR.data.set(name + ".Leave.Yaw", yaw);
 								JNR.data.set(name + ".Leave.Pitch", pitch);
 
-								saveFile(p, "§7Leave-Punkt gesetzt.");
+								if (Language.getLanguage().equalsIgnoreCase("german")) {
+									saveFile(p, "§7Leave-Punkt gesetzt.");
+								} else {
+									saveFile(p, "§7Leave-Point set.");
+								}
 							} else {
-								p.sendMessage(JNR.prefix + "§cEin JumpAndRun mit dem Namen '§e" + name
-										+ "§c' existiert nicht!");
-								p.sendMessage(JNR.prefix + "§cBenutze: /jnr create " + name
-										+ " §cum das JumpAndRun zu erstellen!");
+								Language.sendMessage(p,
+										JNR.prefix + "§cThere is no JumpAndRun named '§e" + name + "§c'!", JNR.prefix
+												+ "§cEin JumpAndRun mit dem Namen '§e" + name + "§c' existiert nicht!");
+								Language.sendMessage(p,
+										JNR.prefix + "§cUse: /jnr create " + name + " §cto create this JumpAndRun!",
+										JNR.prefix + "§cBenutze: /jnr create " + name
+												+ " §cum das JumpAndRun zu erstellen!");
 							}
 						} else if (args[0].equalsIgnoreCase("resetall")) {
 							String pName = args[1];
@@ -158,8 +185,8 @@ public class JNRCommand implements CommandExecutor {
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
-							p.sendMessage(
-									"§7Du hast die gesamten JumpAndRun Stats von §e" + pName + " §czurückgesetzt§7.");
+							Language.sendMessage(p, "§7You have §creset §7the JumpAndRun stats of §e" + pName + " §7.",
+									"§7Du hast die JumpAndRun Stats von §e" + pName + " §czurückgesetzt§7.");
 						} else if (args[0].equalsIgnoreCase("allcpstowin")) {
 							if (args[1].equalsIgnoreCase("true")) {
 								JNR.data.set("NeedAllCheckpointsToWin", true);
@@ -173,10 +200,11 @@ public class JNRCommand implements CommandExecutor {
 						} else if (args[0].equalsIgnoreCase("item")) {
 							if (p.getItemInHand() != null && p.getItemInHand().getType().getId() != 0) {
 								if (args[1].equalsIgnoreCase("checkpoint")) {
-									JNR.data.set("Item.BackToLastCheckpoint", p.getItemInHand().getType().toString() + ":"
-											+ p.getItemInHand().getData().getData());
-									saveFile(p, "§7BackToLastCheckpoint Item -> " + p.getItemInHand().getType().toString()
+									JNR.data.set("Item.BackToLastCheckpoint", p.getItemInHand().getType().toString()
 											+ ":" + p.getItemInHand().getData().getData());
+									saveFile(p,
+											"§7BackToLastCheckpoint Item -> " + p.getItemInHand().getType().toString()
+													+ ":" + p.getItemInHand().getData().getData());
 								} else if (args[1].equalsIgnoreCase("hide")) {
 									JNR.data.set("Item.HidePlayers", p.getItemInHand().getType().toString() + ":"
 											+ p.getItemInHand().getData().getData());
@@ -196,8 +224,23 @@ public class JNRCommand implements CommandExecutor {
 									sendHelp(p, args[0]);
 								}
 							} else {
-								p.sendMessage(JNR.prefix + "§cDu musst ein Item in der Hand haben.");
+								Language.sendMessage(p, JNR.prefix + "§cYou must hold an item in your hand.",
+										JNR.prefix + "§cDu musst ein Item in der Hand haben.");
 							}
+						} else if (args[0].equalsIgnoreCase("language") || args[0].equalsIgnoreCase("lang")
+								|| args[0].equalsIgnoreCase("sprache")) {
+							JNR.getInstance().getConfig().set("Language", args[1]);
+							JNR.getInstance().saveConfig();
+
+							Language.sendMessage(p, JNR.prefix + "§7Language set to §6" + args[1] + "§7.",
+									JNR.prefix + "§7Sprache zu §6" + args[1] + " §7geändert.");
+
+							JNR.getInstance().changeLanguage();
+
+							Language.sendMessage(p, JNR.prefix
+									+ "§cGenerated new 'messages.yml'. Content of old 'messages.yml' moved to 'messagesOLD.yml'.",
+									JNR.prefix
+											+ "§c'messages.yml' neu generiert. Inhalt der alten 'messages.yml' in 'messagesOLD.yml' verschoben.");
 						} else {
 							sendHelp(p, args[0]);
 						}
@@ -252,15 +295,23 @@ public class JNRCommand implements CommandExecutor {
 
 									JNR.data.set(name + ".Checkpoints", Integer.valueOf(args[2]));
 
-									saveFile(p, "§a" + Integer.valueOf(args[2]) + ". §7Checkpoint wurde gesetzt.");
+									if (Language.getLanguage().equalsIgnoreCase("german")) {
+										saveFile(p, "§a" + Integer.valueOf(args[2]) + ". §7Checkpoint wurde gesetzt.");
+									} else {
+										saveFile(p, "§a" + Integer.valueOf(args[2]) + ". §7checkpoint set.");
+									}
 								} catch (Exception e) {
-									p.sendMessage(JNR.prefix + "§cEin Fehler ist aufgetreten!");
+									Language.sendMessage(p, JNR.prefix + "§cAn error has occurred!",
+											JNR.prefix + "§cEin Fehler ist aufgetreten!");
 								}
 							} else {
-								p.sendMessage(JNR.prefix + "§cEin JumpAndRun mit dem Namen '§e" + name
-										+ "§c' existiert nicht!");
-								p.sendMessage(JNR.prefix + "§cBenutze: /jnr create " + name
-										+ " §cum das JumpAndRun zu erstellen!");
+								Language.sendMessage(p,
+										JNR.prefix + "§cThere is no JumpAndRun named '§e" + name + "§c'!", JNR.prefix
+												+ "§cEin JumpAndRun mit dem Namen '§e" + name + "§c' existiert nicht!");
+								Language.sendMessage(p,
+										JNR.prefix + "§cUse: /jnr create " + name + " §cto create this JumpAndRun!",
+										JNR.prefix + "§cBenutze: /jnr create " + name
+												+ " §cum das JumpAndRun zu erstellen!");
 							}
 						} else if (args[0].equalsIgnoreCase("reset")) {
 							String pName = args[1];
@@ -282,10 +333,13 @@ public class JNRCommand implements CommandExecutor {
 									e.printStackTrace();
 								}
 
-								p.sendMessage("§7Du hast die JumpAndRun Stats von §e" + pName
-										+ " §czurückgesetzt§7. §8[Map: " + map + "]");
+								Language.sendMessage(p,
+										"§7You have §creset §7the map-stats of §e" + pName + "§7. §8[Map: " + map + "]",
+										"§7Du hast die Map-Stats von §e" + pName + " §czurückgesetzt§7. §8[Map: " + map
+												+ "]");
 							} else {
-								p.sendMessage("§cDie Map §e" + map + " §cexistiert nicht.");
+								Language.sendMessage(p, "§cThere is no map named §e" + map + "§c.",
+										"§cDie Map §e" + map + " §cexistiert nicht.");
 							}
 						}
 					} else {
@@ -298,6 +352,7 @@ public class JNRCommand implements CommandExecutor {
 		}
 
 		return false;
+
 	}
 
 	@SuppressWarnings("deprecation")
@@ -391,43 +446,57 @@ public class JNRCommand implements CommandExecutor {
 		if (p.hasPermission("jnr.admin")) {
 			p.sendMessage("§8======§6JumpAndRun§8======");
 			p.sendMessage("");
-			p.sendMessage("§6/jnr create <Name> §7- §aErstellt ein neues JumpAndRun");
-			p.sendMessage("§6/jnr setspawn <Name> §7- §aSetzt den Spawn-Punkt für ein JumpAndRun");
-			p.sendMessage("§6/jnr setcp <Name> <Checkpoint> §7- §aSetzt einen Checkpoint für ein JumpAndRun");
-			p.sendMessage("§6/jnr setleave <Name> §7- §aSetzt den Leave-Punkt für ein JumpAndRun");
+			Language.sendMessage(p, "§6/jnr create <Name> §7- §aCreates a new JumpAndRun",
+					"§6/jnr create <Name> §7- §aErstellt ein neues JumpAndRun");
+			Language.sendMessage(p, "§6/jnr setspawn <Name> §7- §aSets the spawn-point for a JumpAndRun",
+					"§6/jnr setspawn <Name> §7- §aSetzt den Spawn-Punkt für ein JumpAndRun");
+			Language.sendMessage(p, "§6/jnr setcp <Name> <Checkpoint> §7- §aSets a checkpoint for a JumpAndRun",
+					"§6/jnr setcp <Name> <Checkpoint> §7- §aSetzt einen Checkpoint für ein JumpAndRun");
+			Language.sendMessage(p, "§6/jnr setleave <Name> §7- §aSets the leave-point for a JumpAndRun",
+					"§6/jnr setleave <Name> §7- §aSetzt den Leave-Punkt für ein JumpAndRun");
 //			p.sendMessage("§6/jnr setmoney <Währung> §7- §aSetzt den Namen der Währung fest");
 //			p.sendMessage("§6/jnr setwin <Name> <Money> §7- §aSetzt den Gewinn für das JumpAndRun fest");
 //			p.sendMessage("§6/jnr setextrawin <Money> §7- §aSetzt den Gewinn für das Aufstellen eines neuen Rekords fest");
-			p.sendMessage("§6/jnr setblock <Checkpoint/Win> §7- §aSetzt den Gewinn/Checkpoint-Block");
-			p.sendMessage(
-					"§6/jnr item <checkpoint/hide/unhide/quit> §7- §aLegt die JumpAndRun Items fest (Zurück zum letzten Checkpoint, Spieler verstecken, Spieler anzeigen, Verlassen)");
-			p.sendMessage(
+			Language.sendMessage(p, "§6/jnr setblock <Checkpoint/Win> §7- §aSets the Win/Checkpoint-Block",
+					"§6/jnr setblock <Checkpoint/Win> §7- §aSetzt den Gewinn/Checkpoint-Block");
+			Language.sendMessage(p,
+					"§6/jnr item <checkpoint/hide/unhide/quit> §7- §aSets the JumpAndRun-Items (Back to last checkpoint, Hide players, Show players, Quit)",
+					"§6/jnr item <checkpoint/hide/unhide/quit> §7- §aLegt die JumpAndRun-Items fest (Zurück zum letzten Checkpoint, Spieler verstecken, Spieler anzeigen, Verlassen)");
+			Language.sendMessage(p,
+					"§6/jnr allcpstowin <true/false> §7- §aDetermines if you need all checkpoints to complete a JumpAndRun or not",
 					"§6/jnr allcpstowin <true/false> §7- §aLegt fest ob man alle Checkpoints benötigt, um das JumpAndRun abzuschließen");
-			p.sendMessage("§6/jnr reload §7- §aLädt das Plugin neu");
-			p.sendMessage("§6/jnr resetall <Spieler> §7- §aSetzt alle Stats von einem Spieler zurück");
-			p.sendMessage(
+			Language.sendMessage(p,
+					"§6/jnr language <english/german> §7- §aSets the language to english/german (if you execute this command, all players will be kicked out of the JumpAndRun)",
+					"§6/jnr language <english/german> §7- §aLegt die Sprache fest (Englisch/Deutsch) (wenn du diesen Befehl nutzt, werden alle Spieler aus dem JumpAndRun gekickt)");
+			Language.sendMessage(p, "§6/jnr reload §7- §aReloads the configs of the plugin",
+					"§6/jnr reload §7- §aLädt die Plugin-Configs neu");
+			Language.sendMessage(p, "§6/jnr resetall <Player> §7- §aResets all stats of a player",
+					"§6/jnr resetall <Spieler> §7- §aSetzt alle Stats von einem Spieler zurück");
+			Language.sendMessage(p, "§6/jnr reset <Player> <Map> §7- §aResets the map-stats of a player",
 					"§6/jnr reset <Spieler> <Map> §7- §aSetzt die Stats für eine bestimmte Map von einem Spieler zurück");
-			p.sendMessage(
+			Language.sendMessage(p, "§6/jnr stats <Player> <Map> §7- §aShows the stats of a player",
 					"§6/jnr stats <Spieler> <Map> §7- §aZeigt die Stats für einen Spieler auf einer bestimmten Map an");
-			p.sendMessage("§6/jnr join <Map> §7- §aTrete einem JumpAndRun bei");
+			Language.sendMessage(p, "§6/jnr join <Map> §7- §aJoin a JumpAndRun",
+					"§6/jnr join <Map> §7- §aTrete einem JumpAndRun bei");
 			p.sendMessage("");
 			p.sendMessage("§8=====§9Plugin by Seblii§8=====");
 		} else {
 			if (cmd.equalsIgnoreCase("stats")) {
-				p.sendMessage("§cNutze: /jnr stats <Spieler> <Map>");
+				Language.sendMessage(p, "§cUse: /jnr stats <Player> <Map>", "§cNutze: /jnr stats <Spieler> <Map>");
 			} else if (cmd.equalsIgnoreCase("join")) {
 				if (JNR.getInstance().getConfig().getBoolean("EnableJoinCommand")) {
-					p.sendMessage("§cNutze: /jnr join <Map>");
+					Language.sendMessage(p, "§cUse: /jnr join <Map>", "§cNutze: /jnr join <Map>");
 				} else {
-					p.sendMessage("§cNutze: /jnr stats <Spieler> <Map>");
+					Language.sendMessage(p, "§cUser: /jnr stats <Player> <Map>", "§cNutze: /jnr stats <Spieler> <Map>");
 				}
 			} else {
 				if (JNR.getInstance().getConfig().getBoolean("EnableJoinCommand")) {
-					p.sendMessage(
+					Language.sendMessage(p, "§6/jnr stats <Spieler> <Map> §7- §aShows the stats of a player",
 							"§6/jnr stats <Spieler> <Map> §7- §aZeigt die Stats für einen Spieler auf einer bestimmten Map an");
-					p.sendMessage("§6/jnr join <Map> §7- §aTrete einem JumpAndRun bei");
+					Language.sendMessage(p, "§6/jnr join <Map> §7- §aJoin a JumpAndRun",
+							"§6/jnr join <Map> §7- §aTrete einem JumpAndRun bei");
 				} else {
-					p.sendMessage("§cNutze: /jnr stats <Spieler> <Map>");
+					Language.sendMessage(p, "§cUse: /jnr stats <Player> <Map>", "§cNutze: /jnr stats <Spieler> <Map>");
 				}
 			}
 		}
@@ -436,9 +505,11 @@ public class JNRCommand implements CommandExecutor {
 	public static void saveFile(Player p, String msg) {
 		try {
 			JNR.data.save(JNR.file);
-			p.sendMessage(JNR.prefix + "§aGespeichert - " + "§8{§7" + msg + "§8}");
+			Language.sendMessage(p, JNR.prefix + "§aSaved - " + "§8{§7" + msg + "§8}",
+					JNR.prefix + "§aGespeichert - " + "§8{§7" + msg + "§8}");
 		} catch (IOException e) {
-			p.sendMessage(JNR.prefix + "§cBeim Speichern ist ein Fehler aufgetreten!");
+			Language.sendMessage(p, JNR.prefix + "§cAn error has occured!",
+					JNR.prefix + "§cBeim Speichern ist ein Fehler aufgetreten!");
 			e.printStackTrace();
 		}
 	}
@@ -654,7 +725,11 @@ public class JNRCommand implements CommandExecutor {
 			ti = "00" + ti;
 		}
 
-		return "§6§l" + min + "§7:§6§l" + sec + "§7,§6" + ti;
+		if (Language.getLanguage().equalsIgnoreCase("german")) {
+			return "§6§l" + min + "§7:§6§l" + sec + "§7,§6" + ti;
+		} else {
+			return "§6§l" + min + "§7:§6§l" + sec + "§7.§6" + ti;
+		}
 	}
 
 	public static String calculateTimeInSeconds(double time) {

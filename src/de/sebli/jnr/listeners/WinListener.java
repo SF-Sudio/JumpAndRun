@@ -72,9 +72,6 @@ public class WinListener implements Listener {
 
 					String jnr = StartListener.playing.get(p.getName());
 
-					StartListener.playing.remove(p.getName());
-					StartListener.checkpoint.remove(p.getName());
-
 					if (JNR.stats.contains(p.getName() + "." + jnr + ".finishedTimes")) {
 						int ft = JNR.stats.getInt(p.getName() + "." + jnr + ".finishedTimes");
 						JNR.stats.set(p.getName() + "." + jnr + ".finishedTimes", ft + 1);
@@ -269,87 +266,89 @@ public class WinListener implements Listener {
 	}
 
 	public static void reset(Player p) {
-		StartListener.cooldown.add(p.getName());
+		if (StartListener.playing.containsKey(p.getName())) {
+			StartListener.cooldown.add(p.getName());
 
-		String jnr = (String) JNR.playerData.get(p.getName() + ".Map");
+			String jnr = (String) JNR.playerData.get(p.getName() + ".Map");
 
-		if (!JNR.data.contains(jnr + ".Leave")) {
-			World world = Bukkit.getWorld(JNR.playerData.getString(p.getName() + ".Location.World"));
-			double x = JNR.playerData.getDouble(p.getName() + ".Location.X");
-			double y = JNR.playerData.getDouble(p.getName() + ".Location.Y");
-			double z = JNR.playerData.getDouble(p.getName() + ".Location.Z");
-			float yaw = (float) JNR.playerData.getDouble(p.getName() + ".Location.Yaw");
-			float pitch = (float) JNR.playerData.getDouble(p.getName() + ".Location.Pitch");
+			if (!JNR.data.contains(jnr + ".Leave")) {
+				World world = Bukkit.getWorld(JNR.playerData.getString(p.getName() + ".Location.World"));
+				double x = JNR.playerData.getDouble(p.getName() + ".Location.X");
+				double y = JNR.playerData.getDouble(p.getName() + ".Location.Y");
+				double z = JNR.playerData.getDouble(p.getName() + ".Location.Z");
+				float yaw = (float) JNR.playerData.getDouble(p.getName() + ".Location.Yaw");
+				float pitch = (float) JNR.playerData.getDouble(p.getName() + ".Location.Pitch");
 
-			Location loc = new Location(world, x, y, z, yaw, pitch);
+				Location loc = new Location(world, x, y, z, yaw, pitch);
 
-			p.teleport(loc);
+				p.teleport(loc);
 
-			JNR.playerData.set("Location." + p.getName(), null);
-
-			try {
-				JNR.playerData.save(JNR.file2);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-		} else {
-			World world = Bukkit.getWorld(JNR.data.getString(jnr + ".Leave.World"));
-			double x = JNR.data.getDouble(jnr + ".Leave.X");
-			double y = JNR.data.getDouble(jnr + ".Leave.Y");
-			double z = JNR.data.getDouble(jnr + ".Leave.Z");
-			float yaw = (float) JNR.data.getDouble(jnr + ".Leave.Yaw");
-			float pitch = (float) JNR.data.getDouble(jnr + ".Leave.Pitch");
-
-			Location loc = new Location(world, x, y, z, yaw, pitch);
-
-			p.teleport(loc);
-		}
-
-		StartListener.playing.remove(p.getName());
-		StartListener.checkpoint.remove(p.getName());
-		StartListener.time.remove(p.getName());
-		StartListener.timer.remove(p.getName());
-
-		for (Player all : Bukkit.getOnlinePlayers()) {
-			p.showPlayer(all);
-		}
-
-		new org.bukkit.scheduler.BukkitRunnable() {
-			@SuppressWarnings({ "deprecation", "unchecked" })
-			public void run() {
-				p.setGameMode(GameMode.getByValue(JNR.playerData.getInt(p.getName() + ".Gamemode")));
-				p.setHealth(JNR.playerData.getDouble(p.getName() + ".Health"));
-				p.setFoodLevel(JNR.playerData.getInt(p.getName() + ".FoodLevel"));
-
-				try {
-					p.getInventory().setContents((ItemStack[]) JNR.playerData.get(p.getName() + ".Inv"));
-				} catch (Exception e) {
-					List<ItemStack> items = (List<ItemStack>) JNR.playerData.get(p.getName() + ".Inv");
-					ItemStack[] content = new ItemStack[items.size()];
-
-					int i = 0;
-					for (ItemStack item : items) {
-						content[i] = item;
-
-						i++;
-					}
-
-					p.getInventory().setContents(content);
-				}
-
-				p.updateInventory();
-
-				JNR.playerData.set(p.getName(), null);
-
-				StartListener.cooldown.remove(p.getName());
+				JNR.playerData.set("Location." + p.getName(), null);
 
 				try {
 					JNR.playerData.save(JNR.file2);
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
+			} else {
+				World world = Bukkit.getWorld(JNR.data.getString(jnr + ".Leave.World"));
+				double x = JNR.data.getDouble(jnr + ".Leave.X");
+				double y = JNR.data.getDouble(jnr + ".Leave.Y");
+				double z = JNR.data.getDouble(jnr + ".Leave.Z");
+				float yaw = (float) JNR.data.getDouble(jnr + ".Leave.Yaw");
+				float pitch = (float) JNR.data.getDouble(jnr + ".Leave.Pitch");
+
+				Location loc = new Location(world, x, y, z, yaw, pitch);
+
+				p.teleport(loc);
 			}
-		}.runTaskLater(JNR.getInstance(), 10L);
+
+			StartListener.playing.remove(p.getName());
+			StartListener.checkpoint.remove(p.getName());
+			StartListener.time.remove(p.getName());
+			StartListener.timer.remove(p.getName());
+
+			for (Player all : Bukkit.getOnlinePlayers()) {
+				p.showPlayer(all);
+			}
+
+			new org.bukkit.scheduler.BukkitRunnable() {
+				@SuppressWarnings({ "deprecation", "unchecked" })
+				public void run() {
+					p.setGameMode(GameMode.getByValue(JNR.playerData.getInt(p.getName() + ".Gamemode")));
+					p.setHealth(JNR.playerData.getDouble(p.getName() + ".Health"));
+					p.setFoodLevel(JNR.playerData.getInt(p.getName() + ".FoodLevel"));
+
+					try {
+						p.getInventory().setContents((ItemStack[]) JNR.playerData.get(p.getName() + ".Inv"));
+					} catch (Exception e) {
+						List<ItemStack> items = (List<ItemStack>) JNR.playerData.get(p.getName() + ".Inv");
+						ItemStack[] content = new ItemStack[items.size()];
+
+						int i = 0;
+						for (ItemStack item : items) {
+							content[i] = item;
+
+							i++;
+						}
+
+						p.getInventory().setContents(content);
+					}
+
+					p.updateInventory();
+
+					JNR.playerData.set(p.getName(), null);
+
+					StartListener.cooldown.remove(p.getName());
+
+					try {
+						JNR.playerData.save(JNR.file2);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			}.runTaskLater(JNR.getInstance(), 10L);
+		}
 	}
 
 	@EventHandler

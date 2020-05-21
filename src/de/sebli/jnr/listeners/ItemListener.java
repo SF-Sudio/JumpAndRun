@@ -241,7 +241,7 @@ public class ItemListener implements Listener {
 
 	private void showPlayer(Player p) {
 		for (Player all : Bukkit.getOnlinePlayers()) {
-			p.hidePlayer(all);
+			p.showPlayer(all);
 		}
 		String id2 = "AIR";
 		int subID2 = 0;
