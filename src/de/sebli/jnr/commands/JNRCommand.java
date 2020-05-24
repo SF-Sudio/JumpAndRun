@@ -32,14 +32,15 @@ public class JNRCommand implements CommandExecutor {
 		} else {
 			Player p = (Player) sender;
 			if (args.length == 1) {
-				if (args[0].equalsIgnoreCase("reload") || args[0].equalsIgnoreCase("rl")) {
-					JNR.messages = null;
-					JNR.data = null;
+				if (p.hasPermission("jnr.admin")) {
+					if (args[0].equalsIgnoreCase("reload") || args[0].equalsIgnoreCase("rl")) {
+						JNR.messages = null;
+						JNR.data = null;
 
-					JNR.messages = YamlConfiguration.loadConfiguration(JNR.file4);
-					JNR.data = YamlConfiguration.loadConfiguration(JNR.file);
+						JNR.messages = YamlConfiguration.loadConfiguration(JNR.file4);
+						JNR.data = YamlConfiguration.loadConfiguration(JNR.file);
 
-					JNR.getInstance().reloadConfig();
+						JNR.getInstance().reloadConfig();
 
 //					if (JNR.data.getBoolean("EnableVault")) {
 //						try {
@@ -49,8 +50,11 @@ public class JNRCommand implements CommandExecutor {
 //						}
 //					}
 
-					Language.sendMessage(p, JNR.prefix + "§aConfigs reloaded.",
-							JNR.prefix + "§aConfigs erfolgreich neu geladen.");
+						Language.sendMessage(p, JNR.prefix + "§aConfigs reloaded.",
+								JNR.prefix + "§aConfigs erfolgreich neu geladen.");
+					} else {
+						sendHelp(p, args[0]);
+					}
 				} else {
 					sendHelp(p, args[0]);
 				}
@@ -63,7 +67,8 @@ public class JNRCommand implements CommandExecutor {
 						String map = args[1];
 						joinMap(p, map);
 					} else {
-						sendHelp(p, args[0]);
+						Language.sendMessage(p, JNR.prefix + "§cYou can only join a JumpAndRun with a Join-Sign.",
+								JNR.prefix + "§cDu kannst einem JumpAndRun nur über ein Join-Schild betreten.");
 					}
 				} else {
 					if (p.hasPermission("jnr.admin")) {
@@ -244,6 +249,8 @@ public class JNRCommand implements CommandExecutor {
 						} else {
 							sendHelp(p, args[0]);
 						}
+					} else {
+						sendHelp(p, args[0]);
 					}
 				}
 			} else if (args.length == 3) {
@@ -350,9 +357,7 @@ public class JNRCommand implements CommandExecutor {
 				sendHelp(p, "");
 			}
 		}
-
 		return false;
-
 	}
 
 	@SuppressWarnings("deprecation")
@@ -444,59 +449,109 @@ public class JNRCommand implements CommandExecutor {
 
 	private void sendHelp(Player p, String cmd) {
 		if (p.hasPermission("jnr.admin")) {
-			p.sendMessage("§8======§6JumpAndRun§8======");
-			p.sendMessage("");
-			Language.sendMessage(p, "§6/jnr create <Name> §7- §aCreates a new JumpAndRun",
-					"§6/jnr create <Name> §7- §aErstellt ein neues JumpAndRun");
-			Language.sendMessage(p, "§6/jnr setspawn <Name> §7- §aSets the spawn-point for a JumpAndRun",
-					"§6/jnr setspawn <Name> §7- §aSetzt den Spawn-Punkt für ein JumpAndRun");
-			Language.sendMessage(p, "§6/jnr setcp <Name> <Checkpoint> §7- §aSets a checkpoint for a JumpAndRun",
-					"§6/jnr setcp <Name> <Checkpoint> §7- §aSetzt einen Checkpoint für ein JumpAndRun");
-			Language.sendMessage(p, "§6/jnr setleave <Name> §7- §aSets the leave-point for a JumpAndRun",
-					"§6/jnr setleave <Name> §7- §aSetzt den Leave-Punkt für ein JumpAndRun");
+			if (cmd.equalsIgnoreCase("create")) {
+				Language.sendMessage(p, JNR.prefix + "§cUse: /jnr create <Name>",
+						JNR.prefix + "§cBenutze: /jnr create <Name>");
+			} else if (cmd.equalsIgnoreCase("setspawn")) {
+				Language.sendMessage(p, JNR.prefix + "§cUse: /jnr setspawn <Name>",
+						JNR.prefix + "§cBenutze: /jnr setspawn <Name>");
+			} else if (cmd.equalsIgnoreCase("setcp")) {
+				Language.sendMessage(p, JNR.prefix + "§cUse: /jnr setcp <Name> <Checkpoint>",
+						JNR.prefix + "§cBenutze: /jnr setcp <Name> <Checkpoint>");
+			} else if (cmd.equalsIgnoreCase("setleave")) {
+				Language.sendMessage(p, JNR.prefix + "§cUse: /jnr setleave <Name>",
+						JNR.prefix + "§cBenutze: /jnr setleave <Name>");
+			} else if (cmd.equalsIgnoreCase("setblock")) {
+				Language.sendMessage(p, JNR.prefix + "§cUse: /jnr setblock <Checkpoint/Win>",
+						JNR.prefix + "§cBenutze: /jnr setblock <Checkpoint/Win>");
+			} else if (cmd.equalsIgnoreCase("item")) {
+				Language.sendMessage(p, JNR.prefix + "§cUse: /jnr item <checkpoint/hide/unhide/quit>",
+						JNR.prefix + "§cBenutze: /jnr item <checkpoint/hide/unhide/quit>");
+			} else if (cmd.equalsIgnoreCase("allcpstowin")) {
+				Language.sendMessage(p, JNR.prefix + "§cUse: /jnr allcpstowin <true/false>",
+						JNR.prefix + "§cBenutze: /jnr allcpstowin <true/false>");
+			} else if (cmd.equalsIgnoreCase("language")) {
+				Language.sendMessage(p, JNR.prefix + "§cUse: /jnr language <english/german>",
+						JNR.prefix + "§cBenutze: /jnr language <english/german>");
+			} else if (cmd.equalsIgnoreCase("reload")) {
+				Language.sendMessage(p, JNR.prefix + "§cUse: /jnr reload", JNR.prefix + "§cBenutze: /jnr reload");
+			} else if (cmd.equalsIgnoreCase("resetall")) {
+				Language.sendMessage(p, JNR.prefix + "§cUse: /jnr resetall <Player>",
+						JNR.prefix + "§cBenutze: /jnr resetall <Spieler>");
+			} else if (cmd.equalsIgnoreCase("reset")) {
+				Language.sendMessage(p, JNR.prefix + "§cUse: /jnr reset <Player> <Map>",
+						JNR.prefix + "§cBenutze: /jnr reset <Spieler> <Map>");
+			} else if (cmd.equalsIgnoreCase("stats")) {
+				Language.sendMessage(p, JNR.prefix + "§cUse: /jnr stats <Player> <Map>",
+						JNR.prefix + "§cBenutze: /jnr stats <Spieler> <Map>");
+			} else if (cmd.equalsIgnoreCase("join")) {
+				Language.sendMessage(p, JNR.prefix + "§cUse: /jnr join <Map>",
+						JNR.prefix + "§cBenutze: /jnr join <Map>");
+			} else {
+				p.sendMessage("§8======§6JumpAndRun§8======");
+				p.sendMessage("");
+				Language.sendMessage(p, "§6/jnr create <Name> §7- §aCreates a new JumpAndRun",
+						"§6/jnr create <Name> §7- §aErstellt ein neues JumpAndRun");
+				Language.sendMessage(p, "§6/jnr setspawn <Name> §7- §aSets the spawn-point for a JumpAndRun",
+						"§6/jnr setspawn <Name> §7- §aSetzt den Spawn-Punkt für ein JumpAndRun");
+				Language.sendMessage(p, "§6/jnr setcp <Name> <Checkpoint> §7- §aSets a checkpoint for a JumpAndRun",
+						"§6/jnr setcp <Name> <Checkpoint> §7- §aSetzt einen Checkpoint für ein JumpAndRun");
+				Language.sendMessage(p, "§6/jnr setleave <Name> §7- §aSets the leave-point for a JumpAndRun",
+						"§6/jnr setleave <Name> §7- §aSetzt den Leave-Punkt für ein JumpAndRun");
 //			p.sendMessage("§6/jnr setmoney <Währung> §7- §aSetzt den Namen der Währung fest");
 //			p.sendMessage("§6/jnr setwin <Name> <Money> §7- §aSetzt den Gewinn für das JumpAndRun fest");
 //			p.sendMessage("§6/jnr setextrawin <Money> §7- §aSetzt den Gewinn für das Aufstellen eines neuen Rekords fest");
-			Language.sendMessage(p, "§6/jnr setblock <Checkpoint/Win> §7- §aSets the Win/Checkpoint-Block",
-					"§6/jnr setblock <Checkpoint/Win> §7- §aSetzt den Gewinn/Checkpoint-Block");
-			Language.sendMessage(p,
-					"§6/jnr item <checkpoint/hide/unhide/quit> §7- §aSets the JumpAndRun-Items (Back to last checkpoint, Hide players, Show players, Quit)",
-					"§6/jnr item <checkpoint/hide/unhide/quit> §7- §aLegt die JumpAndRun-Items fest (Zurück zum letzten Checkpoint, Spieler verstecken, Spieler anzeigen, Verlassen)");
-			Language.sendMessage(p,
-					"§6/jnr allcpstowin <true/false> §7- §aDetermines if you need all checkpoints to complete a JumpAndRun or not",
-					"§6/jnr allcpstowin <true/false> §7- §aLegt fest ob man alle Checkpoints benötigt, um das JumpAndRun abzuschließen");
-			Language.sendMessage(p,
-					"§6/jnr language <english/german> §7- §aSets the language to english/german (if you execute this command, all players will be kicked out of the JumpAndRun)",
-					"§6/jnr language <english/german> §7- §aLegt die Sprache fest (Englisch/Deutsch) (wenn du diesen Befehl nutzt, werden alle Spieler aus dem JumpAndRun gekickt)");
-			Language.sendMessage(p, "§6/jnr reload §7- §aReloads the configs of the plugin",
-					"§6/jnr reload §7- §aLädt die Plugin-Configs neu");
-			Language.sendMessage(p, "§6/jnr resetall <Player> §7- §aResets all stats of a player",
-					"§6/jnr resetall <Spieler> §7- §aSetzt alle Stats von einem Spieler zurück");
-			Language.sendMessage(p, "§6/jnr reset <Player> <Map> §7- §aResets the map-stats of a player",
-					"§6/jnr reset <Spieler> <Map> §7- §aSetzt die Stats für eine bestimmte Map von einem Spieler zurück");
-			Language.sendMessage(p, "§6/jnr stats <Player> <Map> §7- §aShows the stats of a player",
-					"§6/jnr stats <Spieler> <Map> §7- §aZeigt die Stats für einen Spieler auf einer bestimmten Map an");
-			Language.sendMessage(p, "§6/jnr join <Map> §7- §aJoin a JumpAndRun",
-					"§6/jnr join <Map> §7- §aTrete einem JumpAndRun bei");
-			p.sendMessage("");
-			p.sendMessage("§8=====§9Plugin by Seblii§8=====");
+				Language.sendMessage(p, "§6/jnr setblock <Checkpoint/Win> §7- §aSets the Win/Checkpoint-Block",
+						"§6/jnr setblock <Checkpoint/Win> §7- §aSetzt den Gewinn/Checkpoint-Block");
+				Language.sendMessage(p,
+						"§6/jnr item <checkpoint/hide/unhide/quit> §7- §aSets the JumpAndRun-Items (Back to last checkpoint, Hide players, Show players, Quit)",
+						"§6/jnr item <checkpoint/hide/unhide/quit> §7- §aLegt die JumpAndRun-Items fest (Zurück zum letzten Checkpoint, Spieler verstecken, Spieler anzeigen, Verlassen)");
+				Language.sendMessage(p,
+						"§6/jnr allcpstowin <true/false> §7- §aDetermines if you need all checkpoints to complete a JumpAndRun or not",
+						"§6/jnr allcpstowin <true/false> §7- §aLegt fest ob man alle Checkpoints benötigt, um das JumpAndRun abzuschließen");
+				Language.sendMessage(p,
+						"§6/jnr language <english/german> §7- §aSets the language to english/german (if you execute this command, all players will be kicked out of the JumpAndRun)",
+						"§6/jnr language <english/german> §7- §aLegt die Sprache fest (Englisch/Deutsch) (wenn du diesen Befehl nutzt, werden alle Spieler aus dem JumpAndRun gekickt)");
+				Language.sendMessage(p, "§6/jnr reload §7- §aReloads the configs of the plugin",
+						"§6/jnr reload §7- §aLädt die Plugin-Configs neu");
+				Language.sendMessage(p, "§6/jnr resetall <Player> §7- §aResets all stats of a player",
+						"§6/jnr resetall <Spieler> §7- §aSetzt alle Stats von einem Spieler zurück");
+				Language.sendMessage(p, "§6/jnr reset <Player> <Map> §7- §aResets the map-stats of a player",
+						"§6/jnr reset <Spieler> <Map> §7- §aSetzt die Stats für eine bestimmte Map von einem Spieler zurück");
+				Language.sendMessage(p, "§6/jnr stats <Player> <Map> §7- §aShows the stats of a player",
+						"§6/jnr stats <Spieler> <Map> §7- §aZeigt die Stats für einen Spieler auf einer bestimmten Map an");
+				Language.sendMessage(p, "§6/jnr join <Map> §7- §aJoin a JumpAndRun",
+						"§6/jnr join <Map> §7- §aTrete einem JumpAndRun bei");
+				p.sendMessage("");
+				p.sendMessage("§8=====§9Plugin by Seblii§8=====");
+			}
 		} else {
 			if (cmd.equalsIgnoreCase("stats")) {
-				Language.sendMessage(p, "§cUse: /jnr stats <Player> <Map>", "§cNutze: /jnr stats <Spieler> <Map>");
+				Language.sendMessage(p, JNR.prefix + "§cUse: /jnr stats <Player> <Map>",
+						JNR.prefix + "§cBenutze: /jnr stats <Spieler> <Map>");
 			} else if (cmd.equalsIgnoreCase("join")) {
 				if (JNR.getInstance().getConfig().getBoolean("EnableJoinCommand")) {
-					Language.sendMessage(p, "§cUse: /jnr join <Map>", "§cNutze: /jnr join <Map>");
+					Language.sendMessage(p, JNR.prefix + "§cUse: /jnr join <Map>",
+							JNR.prefix + "§cBenutze: /jnr join <Map>");
 				} else {
-					Language.sendMessage(p, "§cUser: /jnr stats <Player> <Map>", "§cNutze: /jnr stats <Spieler> <Map>");
+					Language.sendMessage(p, JNR.prefix + "§cUse: /jnr stats <Player> <Map>",
+							JNR.prefix + "§cBenutze: /jnr stats <Spieler> <Map>");
 				}
 			} else {
 				if (JNR.getInstance().getConfig().getBoolean("EnableJoinCommand")) {
+					Language.sendMessage(p, "§8========§6JumpAndRun Help§8========",
+							"§8========§6JumpAndRun Hilfe§8========");
+					p.sendMessage("");
 					Language.sendMessage(p, "§6/jnr stats <Spieler> <Map> §7- §aShows the stats of a player",
 							"§6/jnr stats <Spieler> <Map> §7- §aZeigt die Stats für einen Spieler auf einer bestimmten Map an");
 					Language.sendMessage(p, "§6/jnr join <Map> §7- §aJoin a JumpAndRun",
 							"§6/jnr join <Map> §7- §aTrete einem JumpAndRun bei");
+					p.sendMessage("");
+					Language.sendMessage(p, "§8======§6JumpAndRun Commands§8======",
+							"§8=======§6JumpAndRun Befehle§8=======");
 				} else {
-					Language.sendMessage(p, "§cUse: /jnr stats <Player> <Map>", "§cNutze: /jnr stats <Spieler> <Map>");
+					Language.sendMessage(p, "§cUse: /jnr stats <Player> <Map>",
+							"§cBenutze: /jnr stats <Spieler> <Map>");
 				}
 			}
 		}
