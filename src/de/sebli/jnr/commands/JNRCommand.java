@@ -42,14 +42,6 @@ public class JNRCommand implements CommandExecutor {
 
 						JNR.getInstance().reloadConfig();
 
-//					if (JNR.data.getBoolean("EnableVault")) {
-//						try {
-//							JNR.getInstance().setupEconomy();
-//						} catch (Exception e) {
-//							System.err.println("JumpAndRun: Vault konnte nicht geladen werden!");
-//						}
-//					}
-
 						Language.sendMessage(p, JNR.prefix + "§aConfigs reloaded.",
 								JNR.prefix + "§aConfigs erfolgreich neu geladen.");
 					} else {
@@ -72,21 +64,6 @@ public class JNRCommand implements CommandExecutor {
 					}
 				} else {
 					if (p.hasPermission("jnr.admin")) {
-//						if (args[0].equalsIgnoreCase("setextrawin")) {
-//							try {
-//								int eWin = Integer.valueOf(args[1]);
-//
-//								JNR.data.set("NewRecordWin", eWin);
-//								saveFile(p, "§7Gewinn für einen neuen Rekord auf §a" + eWin + " §7gesetzt.");
-//							} catch (Exception ex) {
-//								p.sendMessage(JNR.prefix
-//										+ "§cEs ist ein Fehler aufgetreten. Bitte gebe einen gültigen Wert ein!");
-//							}
-//						} else if (args[0].equalsIgnoreCase("setmoney")) {
-//							String mn = args[1];
-//							JNR.data.set("MoneyName", mn);
-//							saveFile(p, "§7Währungsname -> " + mn);
-//						}
 						if (args[0].equalsIgnoreCase("setblock")) {
 							String block = p.getInventory().getItemInHand().getType().toString();
 							if (args[1].equalsIgnoreCase("win")) {
@@ -260,25 +237,6 @@ public class JNRCommand implements CommandExecutor {
 					getStats(p, pName, map);
 				} else {
 					if (p.hasPermission("jnr.admin")) {
-//						if (args[0].equalsIgnoreCase("setwin")) {
-//							try {
-//								String name = args[1];
-//								int amount = Integer.valueOf(args[2]);
-//
-//								if (JNR.data.contains(name)) {
-//									JNR.data.set(name + ".Win", amount);
-//									saveFile(p, "§7Gewinn für §a" + args[1] + " auf §6" + amount + JNR.getMoneyName()
-//											+ " §7gesetzt.");
-//								} else {
-//									p.sendMessage(JNR.prefix + "§cEin JumpAndRun mit dem Namen '§e" + name
-//											+ "§c' existiert nicht!");
-//									p.sendMessage(JNR.prefix + "§cBenutze: /jnr create " + name
-//											+ " §cum das JumpAndRun zu erstellen!");
-//								}
-//							} catch (Exception e) {
-//								p.sendMessage(JNR.prefix + "§cEin Fehler ist aufgetreten!");
-//							}
-//						}
 						if (args[0].equalsIgnoreCase("setcp")) {
 							String name = args[1];
 
@@ -498,9 +456,6 @@ public class JNRCommand implements CommandExecutor {
 						"§6/jnr setcp <Name> <Checkpoint> §7- §aSetzt einen Checkpoint für ein JumpAndRun");
 				Language.sendMessage(p, "§6/jnr setleave <Name> §7- §aSets the leave-point for a JumpAndRun",
 						"§6/jnr setleave <Name> §7- §aSetzt den Leave-Punkt für ein JumpAndRun");
-//			p.sendMessage("§6/jnr setmoney <Währung> §7- §aSetzt den Namen der Währung fest");
-//			p.sendMessage("§6/jnr setwin <Name> <Money> §7- §aSetzt den Gewinn für das JumpAndRun fest");
-//			p.sendMessage("§6/jnr setextrawin <Money> §7- §aSetzt den Gewinn für das Aufstellen eines neuen Rekords fest");
 				Language.sendMessage(p, "§6/jnr setblock <Checkpoint/Win> §7- §aSets the Win/Checkpoint-Block",
 						"§6/jnr setblock <Checkpoint/Win> §7- §aSetzt den Gewinn/Checkpoint-Block");
 				Language.sendMessage(p,
@@ -622,27 +577,6 @@ public class JNRCommand implements CommandExecutor {
 
 						executor.sendMessage(message);
 					}
-
-//					executor.sendMessage("§8======§6JumpAndRun§8======");
-//					executor.sendMessage("");
-//					executor.sendMessage("§7JumpAndRun: §6" + map);
-//					executor.sendMessage("§7Angefangene Runden: §6" + playedTimes);
-//					executor.sendMessage("§7Abgeschlossene Runden: §6" + finishedTimes);
-//					executor.sendMessage("§7Fails: §6" + fails);
-//					if (JNR.stats.getInt(name + "." + map + ".bestTime") == 0.0) {
-//						executor.sendMessage("§7Rekordzeit: §6---");
-//					} else {
-//						executor.sendMessage("§7Rekordzeit: §6" + bt);
-//					}
-//					if (!JNR.stats.contains(map + ".globalBestTime")
-//							|| JNR.stats.getInt(map + ".globalBestTime") == 0.0) {
-//						executor.sendMessage(
-//								"§7Globale Rekordzeit: §6Es wurde auf dieser Map noch kein Rekord aufgestellt.");
-//					} else {
-//						executor.sendMessage("§7Globale Rekordzeit: §6" + gbt);
-//					}
-//					executor.sendMessage("");
-//					executor.sendMessage("§8=====§9Stats von §c" + name + "§8=====");
 				} catch (Exception e) {
 					List<String> statsList = JNR.messages.getStringList("Messages.Command.Stats.Player");
 
@@ -663,23 +597,6 @@ public class JNRCommand implements CommandExecutor {
 
 						executor.sendMessage(message);
 					}
-
-//					executor.sendMessage("§8======§6JumpAndRun§8======");
-//					executor.sendMessage("");
-//					executor.sendMessage("§7JumpAndRun: §6" + map);
-//					executor.sendMessage("§7Angefangene Runden: §6" + 0);
-//					executor.sendMessage("§7Abgeschlossene Runden: §6" + 0);
-//					executor.sendMessage("§7Fails: §6" + 0);
-//					executor.sendMessage("§7Rekordzeit: §6---");
-//					if (!JNR.stats.contains(map + ".globalBestTime")
-//							|| JNR.stats.getInt(map + ".globalBestTime") == 0.0) {
-//						executor.sendMessage(
-//								"§7Globale Rekordzeit: §6Es wurde auf dieser Map noch kein Rekord aufgestellt.");
-//					} else {
-//						executor.sendMessage("§7Globale Rekordzeit: §6" + gbt);
-//					}
-//					executor.sendMessage("");
-//					executor.sendMessage("§8=====§9Stats von §c" + name + "§8=====");
 				}
 			} else {
 				List<String> statsList = JNR.messages.getStringList("Messages.Command.Stats.Player");
@@ -700,23 +617,6 @@ public class JNRCommand implements CommandExecutor {
 
 					executor.sendMessage(message);
 				}
-
-//				executor.sendMessage("§8======§6JumpAndRun§8======");
-//				executor.sendMessage("");
-//				executor.sendMessage("§7JumpAndRun: §6" + map);
-//				executor.sendMessage("§7Angefangene Runden: §6" + 0);
-//				executor.sendMessage("§7Abgeschlossene Runden: §6" + 0);
-//				executor.sendMessage("§7Fails: §6" + 0);
-//				executor.sendMessage("§7Rekordzeit: §6---");
-//				if (!JNR.stats.contains(map + ".globalBestTime") || JNR.stats.getInt(map + ".globalBestTime") == 0.0) {
-//					executor.sendMessage(
-//							"§7Globale Rekordzeit: §6Es wurde auf dieser Map noch kein Rekord aufgestellt.");
-//				} else {
-//					executor.sendMessage(
-//							"§7Globale Rekordzeit: §6" + calculateTime(JNR.stats.getDouble(map + ".globalBestTime")));
-//				}
-//				executor.sendMessage("");
-//				executor.sendMessage("§8=====§9Stats von §c" + name + "§8=====");
 			}
 		} else {
 			executor.sendMessage("§cDie Map §e" + map + " §cexistiert nicht.");

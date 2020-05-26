@@ -98,23 +98,6 @@ public class StartListener implements Listener {
 								+ "\n§cHier erfährst du die Gründe dafür: §e§lhttps://www.spigotmc.org/resources/jumpandrun-1-8-1-12-x.78123/updates");
 					}
 				}
-
-//				String line1 = JNR.messages.getString("Messages.JoinSign.1");
-//				String sLine1 = sign.getLine(0);
-//
-//				char[] c = { 'a', 'b', 'c', 'd', 'e', 'f', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'k', 'l',
-//						'm', 'n', 'o', 'r' };
-//
-//				for (char ch : c) {
-//					line1 = line1.replaceAll("&" + ch, "");
-//					sLine1 = sLine1.replaceAll("§" + ch, "");
-//				}
-//
-//				if (sLine1.equalsIgnoreCase(line1)) {
-//					String jnr = sign.getLine(1);
-//
-//					p.performCommand("jnr join " + jnr);
-//				}
 			}
 		} else if (e.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
 			if (e.getClickedBlock().getState() instanceof Sign) {

@@ -45,22 +45,6 @@ public class WinListener implements Listener {
 				if (StartListener.checkpoint.get(p.getName()) > JNR.data
 						.getInt(StartListener.playing.get(p.getName()) + ".Checkpoints")
 						|| !JNR.getInstance().getConfig().getBoolean("NeedAllCheckpointsToWin")) {
-//					int win = JNR.data.getInt(StartListener.playing.get(p.getName()) + ".Win");
-//					int eWin = JNR.data.getInt("NewRecordWin");
-
-//					if (JNR.data.getBoolean("EnableVault")) {
-//						String winTitle1 = JNR.messages.getString("Messages.Win.Title.Vault.1").replaceAll("&", "§")
-//								.replaceAll("%map%", StartListener.playing.get(p.getName()))
-//								.replaceAll("%win%", String.valueOf(win)).replaceAll("%moneyName%", JNR.getMoneyName());
-//
-//						String winTitle2 = JNR.messages.getString("Messages.Win.Title.Vault.2").replaceAll("&", "§")
-//								.replaceAll("%map%", StartListener.playing.get(p.getName()))
-//								.replaceAll("%win%", String.valueOf(win)).replaceAll("%moneyName%", JNR.getMoneyName());
-//
-//						p.sendTitle(winTitle1, winTitle2);
-//
-//						JNR.eco.bankDeposit(p.getName(), win);
-//					}
 
 					String winTitle1 = JNR.messages.getString("Messages.Win.Title.1").replaceAll("&", "§")
 							.replaceAll("%map%", StartListener.playing.get(p.getName()));
@@ -147,17 +131,6 @@ public class WinListener implements Listener {
 									if (!broadcastMsg.equalsIgnoreCase("x"))
 										Bukkit.broadcastMessage(JNR.prefix + broadcastMsg);
 								}
-
-//								if (JNR.data.getBoolean("EnableVault")) {
-//									JNR.eco.bankDeposit(p.getName(), eWin);
-//
-//									String bonusReceivedMsg = JNR.messages.getString("Messages.BonusForNewRecord.Vault")
-//											.replaceAll("&", "§").replaceAll("%bonus%", String.valueOf(eWin))
-//											.replaceAll("%moneyName%", JNR.getMoneyName());
-//
-//									if (!bonusReceivedMsg.equalsIgnoreCase("x"))
-//										p.sendMessage(JNR.prefix + bonusReceivedMsg);
-//								}
 							}
 						}
 

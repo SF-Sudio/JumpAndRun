@@ -55,14 +55,6 @@ public class JNR extends JavaPlugin {
 		loadListeners();
 		loadFiles();
 
-//		if (data.getBoolean("EnableVault")) {
-//			try {
-//				setupEconomy();
-//			} catch (Exception e) {
-//				System.err.println("JumpAndRun: Vault konnte nicht geladen werden!");
-//			}
-//		}
-
 		checkPlayers();
 
 		System.out.println("JumpAndRun: Plugin enabled!");
@@ -321,14 +313,6 @@ public class JNR extends JavaPlugin {
 				messages.set("Messages.Win.Stats", list);
 			}
 
-//		if (!messages.contains("Messages.Win.Title.Vault.1")) {
-//			messages.set("Messages.Win.Title.Vault.1", "&aHerzlichen Glückwunsch!");
-//		}
-//
-//		if (!messages.contains("Messages.Win.Title.Vault.2")) {
-//			messages.set("Messages.Win.Title.Vault.2", "&6Dein Preis: %win%%moneyName%");
-//		}
-
 			if (!messages.contains("Messages.NewPersonalRecord.Title.1")) {
 				messages.set("Messages.NewPersonalRecord.Title.1", "&a&lNeuer persönlicher Rekord!");
 			}
@@ -345,11 +329,6 @@ public class JNR extends JavaPlugin {
 				messages.set("Messages.NewGlobalRecord.Broadcast",
 						"&a%player% &6hat einen neuen Rekord &7(&a%time%&7) &6auf der Map &a%map% &6aufgestellt!");
 			}
-
-//		if (!messages.contains("Messages.BonusForNewRecord.Vault")) {
-//			messages.set("Messages.BonusForNewRecord.Vault",
-//					"&aDu hast zusätzliche &6%bonus%%moneyName% &afür den neuen Rekord erhalten.");
-//		}
 
 			// COMMAND MESSAGES
 			if (!messages.contains("Messages.Command.Stats.Player")) {
@@ -547,23 +526,5 @@ public class JNR extends JavaPlugin {
 
 		loadFiles();
 	}
-
-//	public boolean setupEconomy() {
-//		RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager()
-//				.getRegistration(net.milkbowl.vault.economy.Economy.class);
-//		if (economyProvider != null) {
-//			eco = economyProvider.getProvider();
-//		}
-//
-//		return (eco != null);
-//	}
-
-//	public static String getMoneyName() {
-//		String mn = "$";
-//		if (data.contains("MoneyName")) {
-//			mn = data.getString("MoneyName");
-//		}
-//		return mn;
-//	}
 
 }
