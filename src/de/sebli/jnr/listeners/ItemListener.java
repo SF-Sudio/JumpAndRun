@@ -12,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -105,42 +106,55 @@ public class ItemListener implements Listener {
 				if (p.getInventory().getItemInHand().equals(leave)) {
 					quit(p);
 				} else if (p.getInventory().getItemInHand().equals(show)) {
-					Long millis = System.currentTimeMillis();
+					if (JNR.getInstance().getConfig().getBoolean("EnableItemCooldown")) {
+						Long millis = System.currentTimeMillis();
 
-					if (!wait2.containsKey(p.getName())) {
-						hidePlayer(p);
-						wait2.put(p.getName(), millis);
-					} else if (wait2.containsKey(p.getName())) {
-						Long last = wait2.get(p.getName());
+						if (!wait2.containsKey(p.getName())) {
+							hidePlayer(p);
+							wait2.put(p.getName(), millis);
+						} else if (wait2.containsKey(p.getName())) {
+							Long last = wait2.get(p.getName());
 
-						if (last + 500 > millis) {
-							if (!itemCooldownMsg.equalsIgnoreCase("x"))
-								p.sendMessage(JNR.prefix + itemCooldownMsg);
-							return;
+							if (last + 500 > millis) {
+								if (!itemCooldownMsg.equalsIgnoreCase("x"))
+									p.sendMessage(JNR.prefix + itemCooldownMsg);
+								return;
+							}
+							wait2.put(p.getName(), millis);
+
+							hidePlayer(p);
 						}
-						wait2.put(p.getName(), millis);
-
+					} else {
 						hidePlayer(p);
 					}
 				} else if (p.getInventory().getItemInHand().equals(hide)) {
-					Long millis = System.currentTimeMillis();
+					if (JNR.getInstance().getConfig().getBoolean("EnableItemCooldown")) {
+						Long millis = System.currentTimeMillis();
 
-					if (!wait3.containsKey(p.getName())) {
-						showPlayer(p);
-						wait3.put(p.getName(), millis);
-					} else if (wait3.containsKey(p.getName())) {
-						Long last = wait3.get(p.getName());
+						if (!wait3.containsKey(p.getName())) {
+							showPlayer(p);
+							wait3.put(p.getName(), millis);
+						} else if (wait3.containsKey(p.getName())) {
+							Long last = wait3.get(p.getName());
 
-						if (last + 500 > millis) {
-							if (!itemCooldownMsg.equalsIgnoreCase("x"))
-								p.sendMessage(JNR.prefix + itemCooldownMsg);
-							return;
+							if (last + 500 > millis) {
+								if (!itemCooldownMsg.equalsIgnoreCase("x"))
+									p.sendMessage(JNR.prefix + itemCooldownMsg);
+								return;
+							}
+							wait3.put(p.getName(), millis);
+
+							showPlayer(p);
 						}
-						wait3.put(p.getName(), millis);
-
+					} else {
 						showPlayer(p);
 					}
 				} else if (p.getInventory().getItemInHand().equals(check)) {
+					if (StartListener.startCountdown.containsKey(p.getName())) {
+						return;
+					}
+
+					if (JNR.getInstance().getConfig().getBoolean("EnableItemCooldown")) {
 					Long millis = System.currentTimeMillis();
 
 					if (!wait.containsKey(p.getName())) {
@@ -158,6 +172,9 @@ public class ItemListener implements Listener {
 						}
 						wait.put(p.getName(), millis);
 
+						toLastCP(p);
+					}
+					} else {
 						toLastCP(p);
 					}
 				}
@@ -266,6 +283,13 @@ public class ItemListener implements Listener {
 
 	public static void quit(Player p) {
 		WinListener.reset(p);
+	}
+
+	@EventHandler
+	public void onPickup(PlayerPickupItemEvent e) {
+		if (StartListener.playing.containsKey(e.getPlayer().getName())) {
+			e.setCancelled(true);
+		}
 	}
 
 }

@@ -240,6 +240,8 @@ public class WinListener implements Listener {
 
 	public static void reset(Player p) {
 		if (StartListener.playing.containsKey(p.getName())) {
+			StartListener.startCountdown.remove(p.getName());
+
 			StartListener.cooldown.add(p.getName());
 
 			String jnr = (String) JNR.playerData.get(p.getName() + ".Map");
@@ -285,8 +287,10 @@ public class WinListener implements Listener {
 				p.showPlayer(all);
 			}
 
-			new org.bukkit.scheduler.BukkitRunnable() {
-				@SuppressWarnings({ "deprecation", "unchecked" })
+			Bukkit.getScheduler().runTask(JNR.getInstance(), new Runnable() {
+
+				@SuppressWarnings({ "unchecked", "deprecation" })
+				@Override
 				public void run() {
 					p.setGameMode(GameMode.getByValue(JNR.playerData.getInt(p.getName() + ".Gamemode")));
 					p.setHealth(JNR.playerData.getDouble(p.getName() + ".Health"));
@@ -320,7 +324,7 @@ public class WinListener implements Listener {
 						e1.printStackTrace();
 					}
 				}
-			}.runTaskLater(JNR.getInstance(), 10L);
+			});
 		}
 	}
 

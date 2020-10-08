@@ -1,11 +1,15 @@
 package de.sebli.jnr.listeners;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Sign;
@@ -17,6 +21,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -32,6 +37,7 @@ public class StartListener implements Listener {
 	public static HashMap<String, Integer> timer = new HashMap<>();
 	public static HashMap<String, Long> time = new HashMap<>();
 	public static HashMap<String, Integer> fails = new HashMap<>();
+	public static HashMap<String, Integer> startCountdown = new HashMap<>();
 
 	public static List<String> cooldown = new ArrayList<String>();
 
@@ -183,6 +189,36 @@ public class StartListener implements Listener {
 		if (JNR.playerData.getBoolean(p.getName() + ".isPlaying")) {
 			WinListener.reset(p);
 		}
+
+		if (p.hasPermission("jnr.admin")) {
+			Bukkit.getScheduler().runTaskAsynchronously(JNR.getInstance(), () -> {
+				int resourceID = 78123;
+				try (InputStream inputStream = (new URL(
+						"https://api.spigotmc.org/legacy/update.php?resource=" + resourceID)).openStream();
+						Scanner scanner = new Scanner(inputStream)) {
+					if (scanner.hasNext()) {
+						String latest = scanner.next();
+						String current = JNR.getInstance().getDescription().getVersion();
+
+						int late = Integer.parseInt(latest.replaceAll("\\.", ""));
+						int curr = Integer.parseInt(current.replaceAll("\\.", ""));
+
+						if (curr >= late) {
+						} else {
+							p.sendMessage("§8======§6JumpAndRun§8======");
+							p.sendMessage("");
+							p.sendMessage("§7There is a newer version available - §a" + latest + "§7, you are on - §c"
+									+ current);
+							p.sendMessage("§7Please download the latest version - §4https://www.spigotmc.org/resources/"
+									+ resourceID);
+							p.sendMessage("");
+							p.sendMessage("§8=====§9Plugin by Seblii§8=====");
+						}
+					}
+				} catch (IOException exception) {
+				}
+			});
+		}
 	}
 
 	public static void setInventory(Player p) {
@@ -315,26 +351,65 @@ public class StartListener implements Listener {
 	}
 
 	@SuppressWarnings("deprecation")
-	public static void displayTimer(Player p) {
-		Bukkit.getScheduler().scheduleAsyncRepeatingTask(JNR.getInstance(), new Runnable() {
+	public static void startTimer() {
+		Bukkit.getScheduler().runTaskTimerAsynchronously(JNR.getInstance(), new Runnable() {
 
 			@Override
 			public void run() {
-				if (playing.containsKey(p.getName())) {
-					long time = (System.nanoTime() - StartListener.time.get(p.getName())) / 1000000;
+				for (String name : playing.keySet()) {
+					if (startCountdown.containsKey(name)) {
+						String joinTitle1 = JNR.messages.getString("Messages.JoinTitle.1").replaceAll("&", "§")
+								.replaceAll("%map%", StartListener.playing.get(name));
+						String joinTitle2 = JNR.messages.getString("Messages.JoinTitle.2").replaceAll("&", "§")
+								.replaceAll("%map%", StartListener.playing.get(name));
 
-					String abText = JNR.messages.getString("Messages.ActionBar").replaceAll("&", "§")
-							.replaceAll("%map%", StartListener.playing.get(p.getName()))
-							.replaceAll("%time%", JNRCommand.calculateTimeInSeconds(time))
-							.replaceAll("%fails%", StartListener.fails.get(p.getName()).toString());
+						if (StartListener.startCountdown.get(name) == 0) {
+							Bukkit.getPlayer(name).sendTitle("", "");
 
-					ActionBar.sendActionbar(p, abText);
-				} else {
-					return;
+							StartListener.time.put(name, System.nanoTime());
+
+							StartListener.startCountdown.remove(name);
+
+							return;
+						} else {
+							Bukkit.getPlayer(name).sendTitle(joinTitle1, joinTitle2.replaceAll("%timer%",
+									StartListener.startCountdown.get(name).toString()));
+						}
+
+						StartListener.startCountdown.put(name, StartListener.startCountdown.get(name) - 1);
+					} else if (playing.containsKey(name)) {
+						long time = (System.nanoTime() - StartListener.time.get(name)) / 1000000;
+
+						String abText = JNR.messages.getString("Messages.ActionBar").replaceAll("&", "§")
+								.replaceAll("%map%", StartListener.playing.get(name))
+								.replaceAll("%time%", JNRCommand.calculateTimeInSeconds(time))
+								.replaceAll("%fails%", StartListener.fails.get(name).toString());
+
+						ActionBar.sendActionbar(Bukkit.getPlayer(name), abText);
+					}
 				}
 			}
 
 		}, 0, 20);
+	}
+
+	@EventHandler
+	public void onMove(PlayerMoveEvent e) {
+		Player p = e.getPlayer();
+
+		if (startCountdown.containsKey(p.getName())) {
+			if (e.getFrom().getX() != e.getTo().getX() || e.getFrom().getZ() != e.getTo().getZ()) {
+				p.teleport(new Location(p.getWorld(), e.getFrom().getX(), p.getLocation().getY(), e.getFrom().getZ(),
+						p.getLocation().getYaw(), p.getLocation().getPitch()));
+			}
+		}
+
+		if (playing.containsKey(p.getName())) {
+			if (!(JNR.getInstance().getConfig().getInt("ResetHeight") < 0)
+					&& e.getTo().getY() <= JNR.getInstance().getConfig().getInt("ResetHeight")) {
+				ItemListener.toLastCP(p);
+			}
+		}
 	}
 
 }

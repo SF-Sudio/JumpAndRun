@@ -20,6 +20,8 @@ public class ActionBar {
 
 			playerConnection.getClass().getMethod("sendPacket", getNMSClass("Packet")).invoke(playerConnection, packet);
 		} catch (Exception e) {
+			e.printStackTrace();
+			
 			ActionBar18.sendToPlayer(player, msg);
 		}
 	}

@@ -22,13 +22,13 @@ public class DamageListener implements Listener {
 						e.setCancelled(true);
 					} else {
 						e.setCancelled(false);
-
-						if (p.getHealth() - e.getDamage() <= 0) {
-							e.setCancelled(true);
-							p.setHealth(p.getMaxHealth());
-							ItemListener.toLastCP(p);
-						}
 					}
+				}
+
+				if (p.getHealth() - e.getDamage() <= 0) {
+					e.setCancelled(true);
+					p.setHealth(p.getMaxHealth());
+					ItemListener.toLastCP(p);
 				}
 			}
 
@@ -41,7 +41,9 @@ public class DamageListener implements Listener {
 	@EventHandler
 	public void onEntityDmgByEntity(EntityDamageByEntityEvent e) {
 		if (e.getDamager() instanceof Player) {
-			e.setCancelled(true);
+			if (StartListener.playing.containsKey(e.getDamager().getName())) {
+				e.setCancelled(true);
+			}
 		}
 	}
 

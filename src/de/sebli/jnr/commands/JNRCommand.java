@@ -318,7 +318,6 @@ public class JNRCommand implements CommandExecutor {
 		return false;
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void joinMap(Player p, String jnr) {
 		if (!StartListener.playing.containsKey(p.getName())) {
 			if (!StartListener.cooldown.contains(p.getName())) {
@@ -341,8 +340,6 @@ public class JNRCommand implements CommandExecutor {
 				p.setHealth(p.getMaxHealth());
 				p.setFoodLevel(20);
 
-				StartListener.displayTimer(p);
-
 				if (StartListener.playing.containsKey(p.getName())) {
 					StartListener.playing.remove(p.getName());
 				}
@@ -351,6 +348,13 @@ public class JNRCommand implements CommandExecutor {
 				}
 				StartListener.playing.put(p.getName(), jnr);
 				StartListener.checkpoint.put(p.getName(), 1);
+				StartListener.fails.put(p.getName(), 0);
+
+				if (JNR.getInstance().getConfig().getBoolean("EnableStartCountdown")) {
+					StartListener.startCountdown.put(p.getName(), 3);
+				} else {
+					StartListener.time.put(p.getName(), System.nanoTime());
+				}
 
 				World world = Bukkit.getWorld(JNR.data.getString(jnr + ".World"));
 				double x = JNR.data.getDouble(jnr + ".X");
@@ -362,16 +366,6 @@ public class JNRCommand implements CommandExecutor {
 				Location loc = new Location(world, x, y, z, yaw, pitch);
 
 				p.teleport(loc);
-
-				String joinTitle1 = JNR.messages.getString("Messages.JoinTitle.1").replaceAll("&", "§")
-						.replaceAll("%map%", StartListener.playing.get(p.getName()));
-				String joinTitle2 = JNR.messages.getString("Messages.JoinTitle.2").replaceAll("&", "§")
-						.replaceAll("%map%", StartListener.playing.get(p.getName()));
-
-				p.sendTitle(joinTitle1, joinTitle2);
-
-				StartListener.time.put(p.getName(), System.nanoTime());
-				StartListener.fails.put(p.getName(), 0);
 
 				if (!JNR.stats.contains(jnr + ".globalBestTime")) {
 					JNR.stats.set(jnr + ".globalBestTime", 0.0);

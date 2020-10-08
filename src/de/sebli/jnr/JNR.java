@@ -2,8 +2,11 @@ package de.sebli.jnr;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -57,11 +60,49 @@ public class JNR extends JavaPlugin {
 
 		checkPlayers();
 
+		StartListener.startTimer();
+
 		System.out.println("JumpAndRun: Plugin enabled!");
+
+		checkVersion();
 	}
 
 	private void checkPlayers() {
 		// TODO
+	}
+
+	private void checkVersion() {
+		System.out.println("JumpAndRun: Searching for updates...");
+
+		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+			int resourceID = 78123;
+			try (InputStream inputStream = (new URL(
+					"https://api.spigotmc.org/legacy/update.php?resource=" + resourceID)).openStream();
+					Scanner scanner = new Scanner(inputStream)) {
+				if (scanner.hasNext()) {
+					String latest = scanner.next();
+					String current = getDescription().getVersion();
+
+					int late = Integer.parseInt(latest.replaceAll("\\.", ""));
+					int curr = Integer.parseInt(current.replaceAll("\\.", ""));
+
+					if (curr >= late) {
+						System.out.println("JumpAndRun: No updates found. The server is running the latest version.");
+					} else {
+						System.out.println("");
+						System.out.println("JumpAndRun: There is a newer version available - " + latest
+								+ ", you are on - " + current);
+						System.out.println(
+								"JumpAndRun: Please download the latest version - https://www.spigotmc.org/resources/"
+										+ resourceID);
+						System.out.println("");
+					}
+				}
+			} catch (IOException exception) {
+				System.err.println("JumpAndRun: Cannot search for updates - " + exception.getMessage());
+			}
+		});
+
 	}
 
 	private void loadListeners() {
@@ -124,6 +165,9 @@ public class JNR extends JavaPlugin {
 		getConfig().addDefault("EnableCommandsWhileInGame", false);
 		getConfig().addDefault("EnableFallDamage", false);
 		getConfig().addDefault("EnableJoinCommand", true);
+		getConfig().addDefault("EnableStartCountdown", true);
+		getConfig().addDefault("EnableItemCooldown", true);
+		getConfig().addDefault("ResetHeight", -1);
 		getConfig().addDefault("NeedAllCheckpointsToWin", true);
 
 		// setting up the config files
@@ -244,7 +288,7 @@ public class JNR extends JavaPlugin {
 				messages.set("Messages.JoinTitle.1", "%map%");
 			}
 			if (!messages.contains("Messages.JoinTitle.2")) {
-				messages.set("Messages.JoinTitle.2", "");
+				messages.set("Messages.JoinTitle.2", "&aStartet in: §6%timer%");
 			}
 			if (!messages.contains("Messages.AlreadyInAJumpAndRun")) {
 				messages.set("Messages.AlreadyInAJumpAndRun", "&cDu bist bereits in einem JumpAndRun! (%map%)");
@@ -379,7 +423,7 @@ public class JNR extends JavaPlugin {
 				messages.set("Messages.JoinTitle.1", "%map%");
 			}
 			if (!messages.contains("Messages.JoinTitle.2")) {
-				messages.set("Messages.JoinTitle.2", "");
+				messages.set("Messages.JoinTitle.2", "&aStarting in: &6%timer%");
 			}
 			if (!messages.contains("Messages.AlreadyInAJumpAndRun")) {
 				messages.set("Messages.AlreadyInAJumpAndRun", "&cYou are already in a JumpAndRun! (%map%)");
