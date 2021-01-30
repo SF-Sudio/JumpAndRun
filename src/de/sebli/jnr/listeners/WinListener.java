@@ -26,6 +26,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
 import de.sebli.jnr.JNR;
+import de.sebli.jnr.Language;
 import de.sebli.jnr.commands.JNRCommand;
 
 public class WinListener implements Listener {
@@ -189,11 +190,12 @@ public class WinListener implements Listener {
 								.replaceAll("%checkpoint%", StartListener.checkpoint.get(p.getName()).toString());
 						p.sendTitle(cpReached1, cpReached2);
 						StartListener.checkpoint.put(p.getName(), StartListener.checkpoint.get(p.getName()) + 1);
-						try {
-							p.playSound(p.getLocation(), Sound.LEVEL_UP, 1.0F, 1.0F);
-						} catch (NoSuchFieldError ex) {
-							p.playSound(p.getLocation(), Sound.valueOf("ENTITY_PLAYER_LEVELUP"), 1.0F, 1.0F);
-						}
+//						try {
+//							p.playSound(p.getLocation(), Sound.LEVEL_UP, 1.0F, 1.0F);
+//						} catch (NoSuchFieldError ex) {
+//							p.playSound(p.getLocation(), Sound.valueOf("ENTITY_PLAYER_LEVELUP"), 1.0F, 1.0F);
+//						}
+						p.playSound(p.getLocation(), Sound.valueOf("ENTITY_PLAYER_LEVELUP"), 1.0F, 1.0F);
 
 						getCPTime(p);
 					}
@@ -215,11 +217,12 @@ public class WinListener implements Listener {
 								.replaceAll("&", "§")
 								.replaceAll("%checkpoint%", StartListener.checkpoint.get(p.getName()).toString());
 						p.sendTitle(cpReached1, cpReached2);
-						try {
-							p.playSound(p.getLocation(), Sound.LEVEL_UP, 1.0F, 1.0F);
-						} catch (NoSuchFieldError ex) {
-							p.playSound(p.getLocation(), Sound.valueOf("ENTITY_PLAYER_LEVELUP"), 1.0F, 1.0F);
-						}
+//						try {
+//							p.playSound(p.getLocation(), Sound.LEVEL_UP, 1.0F, 1.0F);
+//						} catch (NoSuchFieldError ex) {
+//							p.playSound(p.getLocation(), Sound.valueOf("ENTITY_PLAYER_LEVELUP"), 1.0F, 1.0F);
+//						}
+						p.playSound(p.getLocation(), Sound.valueOf("ENTITY_PLAYER_LEVELUP"), 1.0F, 1.0F);
 					}
 
 					getCPTime(p);
@@ -347,6 +350,10 @@ public class WinListener implements Listener {
 	public void onQuit(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
 
+		if (JNRCommand.mapCreationCache.containsKey(p.getName())) {
+			JNRCommand.mapCreationCache.remove(p.getName());
+		}
+
 		if (StartListener.playing.containsKey(p.getName())) {
 			String jnr = StartListener.playing.get(p.getName());
 
@@ -359,6 +366,10 @@ public class WinListener implements Listener {
 				e1.printStackTrace();
 			}
 
+			StartListener.startCountdown.remove(p.getName());
+			StartListener.time.remove(p.getName());
+			StartListener.timer.remove(p.getName());
+			StartListener.fails.remove(p.getName());
 			StartListener.checkpoint.remove(p.getName());
 
 			for (Player all : Bukkit.getOnlinePlayers()) {
@@ -403,7 +414,8 @@ public class WinListener implements Listener {
 				try {
 					JNR.data.save(JNR.file);
 
-					e.getPlayer().sendMessage(JNR.prefix + "§cJoin-Schild wurde entfernt.");
+					Language.sendMessage(e.getPlayer(), JNR.prefix + "§cJoin-Sign removed.",
+							JNR.prefix + "§cJoin-Schild wurde entfernt.");
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}

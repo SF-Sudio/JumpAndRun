@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.sebli.jnr.commands.JNRCommand;
+import de.sebli.jnr.commands.TabComplete;
 import de.sebli.jnr.listeners.DamageListener;
 import de.sebli.jnr.listeners.ItemListener;
 import de.sebli.jnr.listeners.StartListener;
@@ -114,6 +115,7 @@ public class JNR extends JavaPlugin {
 
 	private void loadCommands() {
 		getCommand("jnr").setExecutor(new JNRCommand());
+		getCommand("jnr").setTabCompleter(new TabComplete());
 	}
 
 	public void loadFiles() {

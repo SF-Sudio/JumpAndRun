@@ -103,9 +103,9 @@ public class ItemListener implements Listener {
 				leave1.setDisplayName(quitName);
 				leave.setItemMeta(leave1);
 
-				if (p.getInventory().getItemInHand().equals(leave)) {
+				if (p.getInventory().getItemInMainHand().equals(leave)) {
 					quit(p);
-				} else if (p.getInventory().getItemInHand().equals(show)) {
+				} else if (p.getInventory().getItemInMainHand().equals(show)) {
 					if (JNR.getInstance().getConfig().getBoolean("EnableItemCooldown")) {
 						Long millis = System.currentTimeMillis();
 
@@ -127,7 +127,7 @@ public class ItemListener implements Listener {
 					} else {
 						hidePlayer(p);
 					}
-				} else if (p.getInventory().getItemInHand().equals(hide)) {
+				} else if (p.getInventory().getItemInMainHand().equals(hide)) {
 					if (JNR.getInstance().getConfig().getBoolean("EnableItemCooldown")) {
 						Long millis = System.currentTimeMillis();
 
@@ -149,7 +149,7 @@ public class ItemListener implements Listener {
 					} else {
 						showPlayer(p);
 					}
-				} else if (p.getInventory().getItemInHand().equals(check)) {
+				} else if (p.getInventory().getItemInMainHand().equals(check)) {
 					if (StartListener.startCountdown.containsKey(p.getName())) {
 						return;
 					}

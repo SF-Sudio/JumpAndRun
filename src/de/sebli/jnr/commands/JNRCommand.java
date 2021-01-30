@@ -2,11 +2,13 @@ package de.sebli.jnr.commands;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -20,7 +22,9 @@ import de.sebli.jnr.listeners.StartListener;
 
 public class JNRCommand implements CommandExecutor {
 
-	@SuppressWarnings({ "deprecation" })
+	public static HashMap<String, String> mapCreationCache = new HashMap<>();
+
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (!(sender instanceof Player)) {
@@ -59,13 +63,21 @@ public class JNRCommand implements CommandExecutor {
 						String map = args[1];
 						joinMap(p, map);
 					} else {
-						Language.sendMessage(p, JNR.prefix + "§cYou can only join a JumpAndRun with a Join-Sign.",
+						Language.sendMessage(p, JNR.prefix + "§cYou can only join a JumpAndRun through a Join-Sign.",
 								JNR.prefix + "§cDu kannst einem JumpAndRun nur über ein Join-Schild betreten.");
 					}
 				} else {
 					if (p.hasPermission("jnr.admin")) {
 						if (args[0].equalsIgnoreCase("setblock")) {
-							String block = p.getInventory().getItemInHand().getType().toString();
+							if (p.getInventory().getItemInMainHand() == null
+									|| p.getInventory().getItemInMainHand().getType() == Material.AIR) {
+								Language.sendMessage(p, JNR.prefix + "§cYou must hold a block in your hand.",
+										JNR.prefix + "§cDu musst einen Block in der Hand halten.");
+
+								return false;
+							}
+
+							String block = p.getInventory().getItemInMainHand().getType().toString();
 							if (args[1].equalsIgnoreCase("win")) {
 								JNR.data.set("WinBlock", block);
 								saveFile(p, "§7Win-Block");
@@ -75,6 +87,16 @@ public class JNRCommand implements CommandExecutor {
 							}
 						} else if (args[0].equalsIgnoreCase("create")) {
 							String name = args[1];
+							if (name.equalsIgnoreCase("Item") || name.equalsIgnoreCase("JoinSign")) {
+								Language.sendMessage(p,
+										JNR.prefix + "§c'§e" + name
+												+ "§c' is a invalid name. Please use a different name.",
+										JNR.prefix + "§c'§e" + name
+												+ "§c' ist ein ungültiger Name. Bitte benutze einen anderen Namen.");
+
+								return false;
+							}
+
 							if (!JNR.data.contains(name)) {
 								JNR.data.set(name, "true");
 								if (Language.getLanguage().equalsIgnoreCase("german")) {
@@ -84,6 +106,11 @@ public class JNRCommand implements CommandExecutor {
 								}
 								Language.sendMessage(p, "§4§lPlease complete the setup for this JumpAndRun now.",
 										"§4§lBitte vervollständige nun das Setup für dieses JumpAndRun.");
+
+								if (mapCreationCache.containsKey(p.getName()))
+									mapCreationCache.remove(p.getName());
+
+								mapCreationCache.put(p.getName(), name);
 							} else {
 								Language.sendMessage(p,
 										JNR.prefix + "§cThere is already a JumpAndRun named '§e" + name + "§c'",
@@ -180,28 +207,39 @@ public class JNRCommand implements CommandExecutor {
 								sendHelp(p, args[0]);
 							}
 						} else if (args[0].equalsIgnoreCase("item")) {
-							if (p.getItemInHand() != null && p.getItemInHand().getType().getId() != 0) {
+							if (p.getInventory().getItemInMainHand() != null
+									&& p.getInventory().getItemInMainHand().getType().getId() != 0) {
 								if (args[1].equalsIgnoreCase("checkpoint")) {
-									JNR.data.set("Item.BackToLastCheckpoint", p.getItemInHand().getType().toString()
-											+ ":" + p.getItemInHand().getData().getData());
+									JNR.data.set("Item.BackToLastCheckpoint",
+											p.getInventory().getItemInMainHand().getType().toString() + ":"
+													+ p.getInventory().getItemInMainHand().getData().getData());
 									saveFile(p,
-											"§7BackToLastCheckpoint Item -> " + p.getItemInHand().getType().toString()
-													+ ":" + p.getItemInHand().getData().getData());
+											"§7BackToLastCheckpoint Item -> "
+													+ p.getInventory().getItemInMainHand().getType().toString() + ":"
+													+ p.getInventory().getItemInMainHand().getData().getData());
 								} else if (args[1].equalsIgnoreCase("hide")) {
-									JNR.data.set("Item.HidePlayers", p.getItemInHand().getType().toString() + ":"
-											+ p.getItemInHand().getData().getData());
-									saveFile(p, "§7HidePlayers Item -> " + p.getItemInHand().getType().toString() + ":"
-											+ p.getItemInHand().getData().getData());
+									JNR.data.set("Item.HidePlayers",
+											p.getInventory().getItemInMainHand().getType().toString() + ":"
+													+ p.getInventory().getItemInMainHand().getData().getData());
+									saveFile(p,
+											"§7HidePlayers Item -> "
+													+ p.getInventory().getItemInMainHand().getType().toString() + ":"
+													+ p.getInventory().getItemInMainHand().getData().getData());
 								} else if (args[1].equalsIgnoreCase("unhide")) {
-									JNR.data.set("Item.ShowPlayers", p.getItemInHand().getType().toString() + ":"
-											+ p.getItemInHand().getData().getData());
-									saveFile(p, "§7ShowPlayers Item -> " + p.getItemInHand().getType().toString() + ":"
-											+ p.getItemInHand().getData().getData());
+									JNR.data.set("Item.ShowPlayers",
+											p.getInventory().getItemInMainHand().getType().toString() + ":"
+													+ p.getInventory().getItemInMainHand().getData().getData());
+									saveFile(p,
+											"§7ShowPlayers Item -> "
+													+ p.getInventory().getItemInMainHand().getType().toString() + ":"
+													+ p.getInventory().getItemInMainHand().getData().getData());
 								} else if (args[1].equalsIgnoreCase("quit")) {
-									JNR.data.set("Item.Quit", p.getItemInHand().getType().toString() + ":"
-											+ p.getItemInHand().getData().getData());
-									saveFile(p, "§7Quit Item -> " + p.getItemInHand().getType().toString() + ":"
-											+ p.getItemInHand().getData().getData());
+									JNR.data.set("Item.Quit", p.getInventory().getItemInMainHand().getType().toString()
+											+ ":" + p.getInventory().getItemInMainHand().getData().getData());
+									saveFile(p,
+											"§7Quit Item -> "
+													+ p.getInventory().getItemInMainHand().getType().toString() + ":"
+													+ p.getInventory().getItemInMainHand().getData().getData());
 								} else {
 									sendHelp(p, args[0]);
 								}
@@ -242,6 +280,13 @@ public class JNRCommand implements CommandExecutor {
 
 							if (JNR.data.contains(name)) {
 								try {
+									if (Integer.valueOf(args[2]) == 0) {
+										Language.sendMessage(p, JNR.prefix + "§cAn error has occurred!",
+												JNR.prefix + "§cEin Fehler ist aufgetreten!");
+
+										return false;
+									}
+
 									Location loc = p.getLocation();
 
 									String world = loc.getWorld().getName();
@@ -251,14 +296,14 @@ public class JNRCommand implements CommandExecutor {
 									float yaw = loc.getYaw();
 									float pitch = loc.getPitch();
 
+									JNR.data.set(name + ".Checkpoints", Integer.valueOf(args[2]));
+
 									JNR.data.set(name + "." + Integer.valueOf(args[2]) + ".World", world);
 									JNR.data.set(name + "." + Integer.valueOf(args[2]) + ".X", x);
 									JNR.data.set(name + "." + Integer.valueOf(args[2]) + ".Y", y);
 									JNR.data.set(name + "." + Integer.valueOf(args[2]) + ".Z", z);
 									JNR.data.set(name + "." + Integer.valueOf(args[2]) + ".Yaw", yaw);
 									JNR.data.set(name + "." + Integer.valueOf(args[2]) + ".Pitch", pitch);
-
-									JNR.data.set(name + ".Checkpoints", Integer.valueOf(args[2]));
 
 									if (Language.getLanguage().equalsIgnoreCase("german")) {
 										saveFile(p, "§a" + Integer.valueOf(args[2]) + ". §7Checkpoint wurde gesetzt.");
@@ -322,14 +367,15 @@ public class JNRCommand implements CommandExecutor {
 		if (!StartListener.playing.containsKey(p.getName())) {
 			if (!StartListener.cooldown.contains(p.getName())) {
 				if (containsMap(jnr)) {
-					for (String key : JNR.stats.getKeys(false)) {
+					for (String key : JNR.data.getKeys(false)) {
 						if (key.equalsIgnoreCase(jnr)) {
 							jnr = key;
 							break;
 						}
 					}
 				} else {
-					p.sendMessage("§cDie Map §e" + jnr + " §cexistiert nicht.");
+					Language.sendMessage(p, JNR.prefix + "§cThe map §e" + jnr + " §cdoes not exist.",
+							JNR.prefix + "§cDie Map §e" + jnr + " §cexistiert nicht.");
 
 					return;
 				}
@@ -613,7 +659,10 @@ public class JNRCommand implements CommandExecutor {
 				}
 			}
 		} else {
-			executor.sendMessage("§cDie Map §e" + map + " §cexistiert nicht.");
+			Language.sendMessage(executor, JNR.prefix + "§cThe map §e" + map + " §cdoes not exist.",
+					JNR.prefix + "§cDie Map §e" + map + " §cexistiert nicht.");
+
+			sendHelp(executor, "stats");
 
 			return;
 		}
@@ -621,6 +670,10 @@ public class JNRCommand implements CommandExecutor {
 
 	public static boolean containsMap(String map) {
 		boolean cont = false;
+
+		if (map.equalsIgnoreCase("Item") || map.equalsIgnoreCase("JoinSign") || map.equalsIgnoreCase("CheckpointBlock")
+				|| map.equalsIgnoreCase("WinBlock"))
+			return false;
 
 		ArrayList<String> keys = new ArrayList<String>();
 		keys.addAll(JNR.data.getKeys(false));

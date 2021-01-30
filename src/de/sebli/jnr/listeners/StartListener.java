@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -27,6 +26,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import de.sebli.jnr.ActionBar;
 import de.sebli.jnr.JNR;
+import de.sebli.jnr.Language;
 import de.sebli.jnr.commands.JNRCommand;
 
 public class StartListener implements Listener {
@@ -62,7 +62,8 @@ public class StartListener implements Listener {
 				try {
 					JNR.data.save(JNR.file);
 
-					e.getPlayer().sendMessage(JNR.prefix + "§aJoin-Schild wurde erstellt.");
+					Language.sendMessage(e.getPlayer(), JNR.prefix + "§aJoin-Sign created.",
+							JNR.prefix + "§aJoin-Schild wurde erstellt.");
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -96,7 +97,7 @@ public class StartListener implements Listener {
 				if (signLocs.contains(signLocStr)) {
 					String jnr = sign.getLine(1);
 
-					p.performCommand("jnr join " + jnr);
+					JNRCommand.joinMap(p, jnr);
 				} else {
 					if (p.hasPermission("jnr.admin")) {
 						p.sendMessage(JNR.prefix
@@ -154,14 +155,8 @@ public class StartListener implements Listener {
 						if (!errorMsg.equalsIgnoreCase("x"))
 							p.sendMessage(JNR.prefix + errorMsg);
 					}
-				} else {
-					e.setCancelled(false);
 				}
-			} else {
-				e.setCancelled(false);
 			}
-		} else {
-			e.setCancelled(false);
 		}
 
 		if (playing.size() != 0) {
@@ -278,33 +273,36 @@ public class StartListener implements Listener {
 			new org.bukkit.scheduler.BukkitRunnable() {
 				public void run() {
 					p.getInventory().setItem(0, check);
-					try {
-						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
-					} catch (NoSuchFieldError e) {
-						p.playSound(p.getLocation(), Sound.valueOf("ENTITY_ITEM_PICKUP"), 1.0F, 1.0F);
-					}
+//					try {
+//						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
+//					} catch (NoSuchFieldError e) {
+//						p.playSound(p.getLocation(), Sound.valueOf("ENTITY_ITEM_PICKUP"), 1.0F, 1.0F);
+//					}
+					p.playSound(p.getLocation(), Sound.valueOf("ENTITY_ITEM_PICKUP"), 1.0F, 1.0F);
 				}
 			}.runTaskLater(JNR.getInstance(), 5L);
 
 			new org.bukkit.scheduler.BukkitRunnable() {
 				public void run() {
 					p.getInventory().setItem(1, show);
-					try {
-						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
-					} catch (NoSuchFieldError e) {
-						p.playSound(p.getLocation(), Sound.valueOf("ENTITY_ITEM_PICKUP"), 1.0F, 1.0F);
-					}
+//					try {
+//						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
+//					} catch (NoSuchFieldError e) {
+//						p.playSound(p.getLocation(), Sound.valueOf("ENTITY_ITEM_PICKUP"), 1.0F, 1.0F);
+//					}
+					p.playSound(p.getLocation(), Sound.valueOf("ENTITY_ITEM_PICKUP"), 1.0F, 1.0F);
 				}
 			}.runTaskLater(JNR.getInstance(), 10L);
 
 			new org.bukkit.scheduler.BukkitRunnable() {
 				public void run() {
 					p.getInventory().setItem(8, leave);
-					try {
-						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
-					} catch (NoSuchFieldError e) {
-						p.playSound(p.getLocation(), Sound.valueOf("ENTITY_ITEM_PICKUP"), 1.0F, 1.0F);
-					}
+//					try {
+//						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
+//					} catch (NoSuchFieldError e) {
+//						p.playSound(p.getLocation(), Sound.valueOf("ENTITY_ITEM_PICKUP"), 1.0F, 1.0F);
+//					}
+//					p.playSound(p.getLocation(), Sound.valueOf("ENTITY_ITEM_PICKUP"), 1.0F, 1.0F);
 				}
 			}.runTaskLater(JNR.getInstance(), 15L);
 		} catch (Exception e) {
@@ -377,7 +375,7 @@ public class StartListener implements Listener {
 						}
 
 						StartListener.startCountdown.put(name, StartListener.startCountdown.get(name) - 1);
-					} else if (playing.containsKey(name)) {
+					} else if (playing.containsKey(name) && time.containsKey(name)) {
 						long time = (System.nanoTime() - StartListener.time.get(name)) / 1000000;
 
 						String abText = JNR.messages.getString("Messages.ActionBar").replaceAll("&", "§")
