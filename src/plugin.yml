@@ -1,8 +1,11 @@
 name: JumpAndRun
 author: Seblii
-version: 3.9.1
+version: 3.10.0
+api-version: 1.18
 
 main: de.sebli.jnr.JNR
+
+softdepend: [HolographicDisplays]
 
 commands:
   jnr:

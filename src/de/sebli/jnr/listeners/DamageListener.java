@@ -1,5 +1,6 @@
 package de.sebli.jnr.listeners;
 
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,7 +28,7 @@ public class DamageListener implements Listener {
 
 				if (p.getHealth() - e.getDamage() <= 0) {
 					e.setCancelled(true);
-					p.setHealth(p.getMaxHealth());
+					p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getDefaultValue());
 					ItemListener.toLastCP(p);
 				}
 			}

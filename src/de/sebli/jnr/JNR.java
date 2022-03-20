@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.Callable;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -19,6 +20,7 @@ import de.sebli.jnr.listeners.DamageListener;
 import de.sebli.jnr.listeners.ItemListener;
 import de.sebli.jnr.listeners.StartListener;
 import de.sebli.jnr.listeners.WinListener;
+import de.sebli.jnr.utils.Metrics;
 
 public class JNR extends JavaPlugin {
 
@@ -46,6 +48,8 @@ public class JNR extends JavaPlugin {
 	public static File file4 = new File("plugins//JumpAndRun//messages.yml");
 	public static YamlConfiguration messages = null;
 
+	public static boolean isHDEnabled = false;
+
 	@Override
 	public void onDisable() {
 		System.out.println("JumpAndRun: Plugin disabled!");
@@ -54,6 +58,13 @@ public class JNR extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		jnr = this;
+
+//		if (!Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays")) {
+//			System.err.println(
+//					"JumpAndRun: 'HolographicDisplays' was not found. You will not be able to use some features.");
+//		} else {
+//			isHDEnabled = true;
+//		}
 
 		loadCommands();
 		loadListeners();
@@ -66,6 +77,19 @@ public class JNR extends JavaPlugin {
 		System.out.println("JumpAndRun: Plugin enabled!");
 
 		checkVersion();
+
+		int mpid = 14681;
+
+		Metrics metrics = new Metrics(this, mpid);
+
+		metrics.addCustomChart(new Metrics.SimplePie("language", new Callable<String>() {
+
+			@Override
+			public String call() throws Exception {
+				return Language.getLanguage();
+			}
+
+		}));
 	}
 
 	private void checkPlayers() {
@@ -103,7 +127,6 @@ public class JNR extends JavaPlugin {
 				System.err.println("JumpAndRun: Cannot search for updates - " + exception.getMessage());
 			}
 		});
-
 	}
 
 	private void loadListeners() {
@@ -118,6 +141,7 @@ public class JNR extends JavaPlugin {
 		getCommand("jnr").setTabCompleter(new TabComplete());
 	}
 
+	@SuppressWarnings("deprecation")
 	public void loadFiles() {
 		if (!ordner.exists()) {
 			ordner.mkdir();
@@ -174,23 +198,37 @@ public class JNR extends JavaPlugin {
 
 		// setting up the config files
 		if (Language.getLanguage().equalsIgnoreCase("german")) {
-			data.options().header(
+			List<String> dataHeader = new ArrayList<>();
+			dataHeader.add(
 					"Die Einstellungen wurden in die config.yml verschoben! Hier werden nur noch die JumpAndRun-/JoinSchilder-Locations gespeichert.");
+			data.options().setHeader(dataHeader);
 
-			getConfig().options().header(
-					"Achtung! Wenn du 'EnableReloadWhilePlayerInGame' auf 'true' setzt (NICHT empfohlen!) und den Reload-Befehl nutzt während Spieler in einem JumpAndRun sind,"
-							+ "\nkönnen diese die JumpAndRun Items nicht mehr benutzen und müssen neujoinen, um ihr altes Inventar wieder zu bekommen."
-							+ "\n" + "\nBeachte, dass wenn du 'EnableCommandsWhileInGame' auf 'true' setzt,"
-							+ "\ndie Spieler sich mit z.B. einem (wenn vorhanden) Warp- oder Spawn-Befehl aus dem JumpAndRun teleportieren können und die JumpAndRun Items somit behalten können.");
+			List<String> cfgHeader = new ArrayList<>();
+			cfgHeader.add(
+					"Achtung! Wenn du 'EnableReloadWhilePlayerInGame' auf 'true' setzt (NICHT empfohlen!) und den Reload-Befehl nutzt während Spieler in einem JumpAndRun sind,");
+			cfgHeader.add(
+					"können diese die JumpAndRun Items nicht mehr benutzen und müssen neujoinen, um ihr altes Inventar wieder zu bekommen.");
+			cfgHeader.add("");
+			cfgHeader.add("Beachte, dass wenn du 'EnableCommandsWhileInGame' auf 'true' setzt,");
+			cfgHeader.add(
+					"die Spieler sich mit z.B. einem (wenn vorhanden) Warp- oder Spawn-Befehl aus dem JumpAndRun teleportieren können und die JumpAndRun Items somit behalten können.");
+			getConfig().options().setHeader(cfgHeader);
 		} else {
-			data.options().header(
+			List<String> dataHeader = new ArrayList<>();
+			dataHeader.add(
 					"The settings were moved to the config.yml! Only the JumpAndRun-/JoinSign-Locations will be saved in this file.");
+			data.options().setHeader(dataHeader);
 
-			getConfig().options().header(
-					"Attention! If you set 'EnableReloadWhilePlayerInGame' to 'true' (NOT recommended!) and you use the reload-command while players are in a JumpAndRun,"
-							+ "\nthe players can no longer use the JumpAndRun-Items and must rejoin to get their old inventory contents back."
-							+ "\n" + "\nNotice that if you set 'EnableCommandsWhileInGame' to 'true',"
-							+ "\nthe players can teleport theirself, with a warp- or spawn-command (if available), out of the JumpAndRun although they are still in the JumpAndRun-Mode with the JumpAndRun-Items.");
+			List<String> cfgHeader = new ArrayList<>();
+			cfgHeader.add(
+					"Attention! If you set 'EnableReloadWhilePlayerInGame' to 'true' (NOT recommended!) and you use the reload-command while players are in a JumpAndRun,");
+			cfgHeader.add(
+					"the players can no longer use the JumpAndRun-Items and must rejoin to get their old inventory contents back.");
+			cfgHeader.add("");
+			cfgHeader.add("Notice that if you set 'EnableCommandsWhileInGame' to 'true',");
+			cfgHeader.add(
+					"the players can teleport theirself, with a warp- or spawn-command (if available), out of the JumpAndRun although they are still in the JumpAndRun-Mode with the JumpAndRun-Items.");
+			getConfig().options().setHeader(cfgHeader);
 		}
 
 //		if (!data.contains("EnableVault")) {

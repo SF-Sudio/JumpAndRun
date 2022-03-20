@@ -218,54 +218,57 @@ public class StartListener implements Listener {
 
 	public static void setInventory(Player p) {
 		try {
-			String id = "AIR";
-			int subID = 0;
-
-			String id2 = "AIR";
-			int subID2 = 0;
-
-			String id3 = "AIR";
-			int subID3 = 0;
-
-			if (JNR.data.getString("Item.BackToLastCheckpoint").contains(":")) {
-				String[] array = JNR.data.getString("Item.BackToLastCheckpoint").split(":");
-				id = array[0];
-				subID = Integer.valueOf(array[1]);
-			} else {
-				id = JNR.data.getString("Item.BackToLastCheckpoint");
-			}
-
-			if (JNR.data.getString("Item.HidePlayers").contains(":")) {
-				String[] array = JNR.data.getString("Item.HidePlayers").split(":");
-				id2 = array[0];
-				subID2 = Integer.valueOf(array[1]);
-			} else {
-				id2 = JNR.data.getString("Item.HidePlayers");
-			}
-
-			if (JNR.data.getString("Item.Quit").contains(":")) {
-				String[] array = JNR.data.getString("Item.Quit").split(":");
-				id3 = array[0];
-				subID3 = Integer.valueOf(array[1]);
-			} else {
-				id3 = JNR.data.getString("Item.Quit");
-			}
+//			String id = "AIR";
+//			int subID = 0;
+//
+//			String id2 = "AIR";
+//			int subID2 = 0;
+//
+//			String id3 = "AIR";
+//			int subID3 = 0;
+//
+//			if (JNR.data.getString("Item.BackToLastCheckpoint").contains(":")) {
+//				String[] array = JNR.data.getString("Item.BackToLastCheckpoint").split(":");
+//				id = array[0];
+//				subID = Integer.valueOf(array[1]);
+//			} else {
+//				id = JNR.data.getString("Item.BackToLastCheckpoint");
+//			}
+//
+//			if (JNR.data.getString("Item.HidePlayers").contains(":")) {
+//				String[] array = JNR.data.getString("Item.HidePlayers").split(":");
+//				id2 = array[0];
+//				subID2 = Integer.valueOf(array[1]);
+//			} else {
+//				id2 = JNR.data.getString("Item.HidePlayers");
+//			}
+//
+//			if (JNR.data.getString("Item.Quit").contains(":")) {
+//				String[] array = JNR.data.getString("Item.Quit").split(":");
+//				id3 = array[0];
+//				subID3 = Integer.valueOf(array[1]);
+//			} else {
+//				id3 = JNR.data.getString("Item.Quit");
+//			}
 
 			String checkName = JNR.messages.getString("Item.BackToLastCheckpoint.Name").replaceAll("&", "§");
 			String showName = JNR.messages.getString("Item.HidePlayers.Name").replaceAll("&", "§");
 			String quitName = JNR.messages.getString("Item.Quit.Name").replaceAll("&", "§");
 
-			ItemStack check = new ItemStack(Material.getMaterial(id), 1, (byte) subID);
+//			ItemStack check = new ItemStack(Material.getMaterial(id), 1, (byte) subID);
+			ItemStack check = new ItemStack(Material.REDSTONE);
 			ItemMeta check1 = check.getItemMeta();
 			check1.setDisplayName(checkName);
 			check.setItemMeta(check1);
 
-			ItemStack show = new ItemStack(Material.getMaterial(id2), 1, (byte) subID2);
+//			ItemStack show = new ItemStack(Material.getMaterial(id2), 1, (byte) subID2);
+			ItemStack show = new ItemStack(Material.GLOWSTONE_DUST);
 			ItemMeta show1 = show.getItemMeta();
 			show1.setDisplayName(showName);
 			show.setItemMeta(show1);
 
-			ItemStack leave = new ItemStack(Material.getMaterial(id3), 1, (byte) subID3);
+//			ItemStack leave = new ItemStack(Material.getMaterial(id3), 1, (byte) subID3);
+			ItemStack leave = new ItemStack(Material.SLIME_BALL);
 			ItemMeta leave1 = leave.getItemMeta();
 			leave1.setDisplayName(quitName);
 			leave.setItemMeta(leave1);

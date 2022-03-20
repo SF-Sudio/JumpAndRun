@@ -10,6 +10,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -24,7 +25,6 @@ public class JNRCommand implements CommandExecutor {
 
 	public static HashMap<String, String> mapCreationCache = new HashMap<>();
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (!(sender instanceof Player)) {
@@ -207,46 +207,47 @@ public class JNRCommand implements CommandExecutor {
 								sendHelp(p, args[0]);
 							}
 						} else if (args[0].equalsIgnoreCase("item")) {
-							if (p.getInventory().getItemInMainHand() != null
-									&& p.getInventory().getItemInMainHand().getType().getId() != 0) {
-								if (args[1].equalsIgnoreCase("checkpoint")) {
-									JNR.data.set("Item.BackToLastCheckpoint",
-											p.getInventory().getItemInMainHand().getType().toString() + ":"
-													+ p.getInventory().getItemInMainHand().getData().getData());
-									saveFile(p,
-											"§7BackToLastCheckpoint Item -> "
-													+ p.getInventory().getItemInMainHand().getType().toString() + ":"
-													+ p.getInventory().getItemInMainHand().getData().getData());
-								} else if (args[1].equalsIgnoreCase("hide")) {
-									JNR.data.set("Item.HidePlayers",
-											p.getInventory().getItemInMainHand().getType().toString() + ":"
-													+ p.getInventory().getItemInMainHand().getData().getData());
-									saveFile(p,
-											"§7HidePlayers Item -> "
-													+ p.getInventory().getItemInMainHand().getType().toString() + ":"
-													+ p.getInventory().getItemInMainHand().getData().getData());
-								} else if (args[1].equalsIgnoreCase("unhide")) {
-									JNR.data.set("Item.ShowPlayers",
-											p.getInventory().getItemInMainHand().getType().toString() + ":"
-													+ p.getInventory().getItemInMainHand().getData().getData());
-									saveFile(p,
-											"§7ShowPlayers Item -> "
-													+ p.getInventory().getItemInMainHand().getType().toString() + ":"
-													+ p.getInventory().getItemInMainHand().getData().getData());
-								} else if (args[1].equalsIgnoreCase("quit")) {
-									JNR.data.set("Item.Quit", p.getInventory().getItemInMainHand().getType().toString()
-											+ ":" + p.getInventory().getItemInMainHand().getData().getData());
-									saveFile(p,
-											"§7Quit Item -> "
-													+ p.getInventory().getItemInMainHand().getType().toString() + ":"
-													+ p.getInventory().getItemInMainHand().getData().getData());
-								} else {
-									sendHelp(p, args[0]);
-								}
-							} else {
-								Language.sendMessage(p, JNR.prefix + "§cYou must hold an item in your hand.",
-										JNR.prefix + "§cDu musst ein Item in der Hand haben.");
-							}
+							p.sendMessage(JNR.prefix + "§cCommand currently not available.");
+//							if (p.getInventory().getItemInMainHand() != null
+//									&& p.getInventory().getItemInMainHand().getType().getId() != 0) {
+//								if (args[1].equalsIgnoreCase("checkpoint")) {
+//									JNR.data.set("Item.BackToLastCheckpoint",
+//											p.getInventory().getItemInMainHand().getType().toString() + ":"
+//													+ p.getInventory().getItemInMainHand().getData().getData());
+//									saveFile(p,
+//											"§7BackToLastCheckpoint Item -> "
+//													+ p.getInventory().getItemInMainHand().getType().toString() + ":"
+//													+ p.getInventory().getItemInMainHand().getData().getData());
+//								} else if (args[1].equalsIgnoreCase("hide")) {
+//									JNR.data.set("Item.HidePlayers",
+//											p.getInventory().getItemInMainHand().getType().toString() + ":"
+//													+ p.getInventory().getItemInMainHand().getData().getData());
+//									saveFile(p,
+//											"§7HidePlayers Item -> "
+//													+ p.getInventory().getItemInMainHand().getType().toString() + ":"
+//													+ p.getInventory().getItemInMainHand().getData().getData());
+//								} else if (args[1].equalsIgnoreCase("unhide")) {
+//									JNR.data.set("Item.ShowPlayers",
+//											p.getInventory().getItemInMainHand().getType().toString() + ":"
+//													+ p.getInventory().getItemInMainHand().getData().getData());
+//									saveFile(p,
+//											"§7ShowPlayers Item -> "
+//													+ p.getInventory().getItemInMainHand().getType().toString() + ":"
+//													+ p.getInventory().getItemInMainHand().getData().getData());
+//								} else if (args[1].equalsIgnoreCase("quit")) {
+//									JNR.data.set("Item.Quit", p.getInventory().getItemInMainHand().getType().toString()
+//											+ ":" + p.getInventory().getItemInMainHand().getData().getData());
+//									saveFile(p,
+//											"§7Quit Item -> "
+//													+ p.getInventory().getItemInMainHand().getType().toString() + ":"
+//													+ p.getInventory().getItemInMainHand().getData().getData());
+//								} else {
+//									sendHelp(p, args[0]);
+//								}
+//							} else {
+//								Language.sendMessage(p, JNR.prefix + "§cYou must hold an item in your hand.",
+//										JNR.prefix + "§cDu musst ein Item in der Hand haben.");
+//							}
 						} else if (args[0].equalsIgnoreCase("language") || args[0].equalsIgnoreCase("lang")
 								|| args[0].equalsIgnoreCase("sprache")) {
 							JNR.getInstance().getConfig().set("Language", args[1]);
@@ -383,7 +384,7 @@ public class JNRCommand implements CommandExecutor {
 				StartListener.savePlayerData(p);
 
 				p.setGameMode(GameMode.ADVENTURE);
-				p.setHealth(p.getMaxHealth());
+				p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getDefaultValue());
 				p.setFoodLevel(20);
 
 				if (StartListener.playing.containsKey(p.getName())) {

@@ -60,7 +60,7 @@ public class TabComplete implements TabCompleter {
 				commands.add("setcp");
 				commands.add("setleave");
 				commands.add("setblock");
-				commands.add("item");
+//				commands.add("item");
 				commands.add("allcpstowin");
 				commands.add("language");
 				commands.add("reload");
@@ -82,10 +82,10 @@ public class TabComplete implements TabCompleter {
 					commands.add("checkpoint");
 					commands.add("win");
 				} else if (args[0].equalsIgnoreCase("item")) {
-					commands.add("checkpoint");
-					commands.add("hide");
-					commands.add("unhide");
-					commands.add("quit");
+//					commands.add("checkpoint");
+//					commands.add("hide");
+//					commands.add("unhide");
+//					commands.add("quit");
 				} else if (args[0].equalsIgnoreCase("allcpstowin")) {
 					commands.add("true");
 					commands.add("false");

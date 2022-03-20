@@ -241,6 +241,7 @@ public class WinListener implements Listener {
 			p.sendMessage(cpTimeMsg);
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void reset(Player p) {
 		if (StartListener.playing.containsKey(p.getName())) {
 			StartListener.startCountdown.remove(p.getName());
@@ -292,7 +293,7 @@ public class WinListener implements Listener {
 
 			Bukkit.getScheduler().runTask(JNR.getInstance(), new Runnable() {
 
-				@SuppressWarnings({ "unchecked", "deprecation" })
+				@SuppressWarnings({ "unchecked" })
 				@Override
 				public void run() {
 					p.setGameMode(GameMode.getByValue(JNR.playerData.getInt(p.getName() + ".Gamemode")));
@@ -346,6 +347,7 @@ public class WinListener implements Listener {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onQuit(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
